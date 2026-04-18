@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChatGPT Optimizer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="wrap" id="popupRoot">
+    <div class="head">
+      <img class="logo" src="optimize.png" alt="ChatGPT Optimizer">
+      <div class="title-block">
+        <div class="title" data-i18n="extensionName"></div>
+        <div class="creator" data-i18n="creatorLine"></div>
+      </div>
+    </div>
+
+    <label class="row switch-row">
+      <span data-i18n="enabledLabel"></span>
+      <input id="enabled" type="checkbox">
+    </label>
+
+    <label class="row">
+      <span data-i18n="limitLabel"></span>
+      <input id="limit" type="number" min="1" max="200" step="1">
+    </label>
+
+    <div class="row actions">
+      <button id="loadOlder" type="button" data-i18n="loadOlder"></button>
+      <button id="trimNow" type="button" data-i18n="trimNow"></button>
+      <button id="hotReload" type="button" data-i18n="hotReload"></button>
+      <button id="openOptions" type="button" data-i18n="openSettings"></button>
+    </div>
+
+    <div id="scopeNote" class="scope-note" data-i18n="onlyChatgptScope"></div>
+    <div id="status" class="status"></div>
+    <div id="pinnedCount" class="status pinned-status"></div>
+    <div id="debug" class="status"></div>
+  </main>
+
+  <div id="blockedBanner" class="blocked hidden">
+    <div class="blocked-title" data-i18n="openChatgptTab"></div>
+    <div class="creator blocked-creator" data-i18n="creatorLine"></div>
+    <button id="openChatgpt" type="button" data-i18n="openChatgptNow"></button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

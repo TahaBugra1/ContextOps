@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChatGPT Optimizer Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main class="wrap">
+    <div class="title-wrap">
+      <img class="logo" src="optimize.png" alt="ChatGPT Optimizer">
+      <div>
+        <h1 data-i18n="settingsTitle"></h1>
+        <div class="creator" data-i18n="creatorLine"></div>
+      </div>
+    </div>
+
+    <label class="row switch-row">
+      <span data-i18n="enabledLabel"></span>
+      <input id="enabled" type="checkbox">
+    </label>
+
+    <label class="row">
+      <span data-i18n="limitLabel"></span>
+      <input id="limit" type="number" min="1" max="200" step="1">
+    </label>
+
+      <input id="autoTrim" type="checkbox">
+    </label>
+
+    <label class="row switch-row">
+      <span data-i18n="optimizerEnabledLabel"></span>
+      <input id="optimizerEnabled" type="checkbox">
+    </label>
+
+    <label class="row">
+      <span data-i18n="optimizerLanguageLabel"></span>
+      <select id="optimizerLanguage">
+        <option value="en" data-i18n="langEn"></option>
+        <option value="tr" data-i18n="langTr"></option>
+      </select>
+    </label>
+
+    <div class="actions">
+      <button id="save" type="button" data-i18n="apply"></button>
+      <button id="reset" type="button" data-i18n="resetDefaults"></button>
+    </div>
+
+    <div id="status" class="status"></div>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

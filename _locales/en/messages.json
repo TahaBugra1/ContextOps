@@ -1,0 +1,123 @@
+{
+  "extensionName": {
+    "message": "ChatGPT Optimizer"
+  },
+  "extensionDescription": {
+    "message": "Reduces lag by trimming old chat messages before they render in long conversations. Creator: lmehmetkaraca"
+  },
+  "creatorLine": {
+    "message": "Creator: Yusuf Çinar & Taha Buğra Ak"
+  },
+  "activeLabel": {
+    "message": "Active"
+  },
+  "enabledLabel": {
+    "message": "ON/OFF"
+  },
+  "limitLabel": {
+    "message": "Message Limit (Bubbles)"
+  },
+  "apply": {
+    "message": "Apply"
+  },
+  "trimNow": {
+    "message": "Optimize now"
+  },
+  "loadOlder": {
+    "message": "Load older"
+  },
+  "hotReload": {
+    "message": "Hot Reload"
+  },
+  "openSettings": {
+    "message": "Open settings"
+  },
+  "statusPaused": {
+    "message": "Paused"
+  },
+  "statusKeeping": {
+    "message": "Keeping last: $1 messages",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "statusSearching": {
+    "message": "Preparing page"
+  },
+  "layoutUnsupported": {
+    "message": "Layout not supported"
+  },
+  "activeToast": {
+    "message": "Optimizer is active"
+  },
+  "onlyChatgptScope": {
+    "message": "Works only on ChatGPT tabs"
+  },
+  "openChatgptTab": {
+    "message": "This extension works only on ChatGPT tabs"
+  },
+  "openChatgptNow": {
+    "message": "Open ChatGPT"
+  },
+  "settingsTitle": {
+    "message": "ChatGPT Optimizer Settings"
+  },
+  "autoTrimLabel": {
+    "message": "Auto optimize"
+  },
+  "showToolbarLabel": {
+    "message": "Show in-page toolbar"
+  },
+  "resetDefaults": {
+    "message": "Reset defaults"
+  },
+  "savedStatus": {
+    "message": "Settings saved"
+  },
+  "resetDone": {
+    "message": "Defaults restored"
+  },
+  "olderNotRecoverable": {
+    "message": "$1 older messages can no longer be restored",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "renderedLabel": {
+    "message": "rendered"
+  },
+  "hiddenLabel": {
+    "message": "skipped"
+  },
+  "star": {
+    "message": "Star"
+  },
+  "unstar": {
+    "message": "Unstar"
+  },
+  "pinned": {
+    "message": "Pinned"
+  },
+  "idNotFound": {
+    "message": "Message ID not found yet. Please wait a second."
+  },
+  "optimizerEnabledLabel": {
+    "message": "Magic Wand (Prompt Optimizer)"
+  },
+  "optimizerLanguageLabel": {
+    "message": "Magic Wand Output Language"
+  },
+  "langTr": {
+    "message": "Turkish"
+  },
+  "langEn": {
+    "message": "English"
+  },
+  "improvePrompt": {
+    "message": "Magic Wand: Improve Prompt"
+  }
+}
