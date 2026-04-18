@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ChatGPT Optimizer
 
 ## English
@@ -63,3 +64,6 @@ ChatGPT Optimizer, ChatGPT web arayüzünde uzun sohbetlerde oluşan hantallığ
 2. `Developer mode` seçeneğini açın
 3. `Load unpacked` butonuna basın
 4. Bu proje klasörünü seçin
+=======
+# ContextOps
+>>>>>>> 600d534507c6a9a10a5e0d7158aeda9bb880fbf5
