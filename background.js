@@ -18,24 +18,60 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 /**
  * Handles the optimization by opening a temporary background tab
  */
-async function handleOptimization(instruction, attempt = 1) {
-  // DEEP LOOK: Use a minimized popup window instead of a background tab to be 100% stealthy
-  const win = await chrome.windows.create({
-    url: 'https://chatgpt.com/?temporary-chat=true',
-    type: 'popup',
-    state: 'minimized',
-    focused: false
-  });
+let workerWindowId = null;
+let workerTabId = null;
+let workerBusy = false;
 
-  const tabId = win.tabs[0].id;
+/**
+ * Handles the optimization by using a persistent hidden worker window
+ */
+async function handleOptimization(instruction, attempt = 1) {
+  if (workerBusy && attempt === 1) {
+    // If busy, wait a bit or try anyway (the queue logic could be added but let's keep it simple)
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  
+  workerBusy = true;
 
   try {
-    await waitForTabComplete(tabId);
-    await new Promise(r => setTimeout(r, 800)); // Performance: Reduced from 2000ms to 800ms
+    let win = null;
+    if (workerWindowId) {
+      try {
+        win = await chrome.windows.get(workerWindowId, { populate: true });
+      } catch (e) {
+        workerWindowId = null;
+        workerTabId = null;
+      }
+    }
+
+    if (!win) {
+      win = await chrome.windows.create({
+        url: 'https://chatgpt.com/?temporary-chat=true',
+        type: 'popup',
+        state: 'minimized',
+        focused: false
+      });
+      workerWindowId = win.id;
+      workerTabId = win.tabs[0].id;
+      await waitForTabComplete(workerTabId);
+      await new Promise(r => setTimeout(r, 1500)); // Initial load needs more time
+    } else {
+      // Reuse existing tab - navigate to temporary chat to clear previous context if needed
+      // Or just stay on the page if it's already there
+      const tab = win.tabs[0];
+      if (!tab.url.includes('temporary-chat=true')) {
+        await chrome.tabs.update(tab.id, { url: 'https://chatgpt.com/?temporary-chat=true' });
+        await waitForTabComplete(tab.id);
+        await new Promise(r => setTimeout(r, 800));
+      }
+    }
+
+    const tabId = workerTabId;
 
     // DEEP LOOK: Check if page is blank or errored before script injection
     const tabInfo = await chrome.tabs.get(tabId);
     if (!tabInfo.url.includes('chatgpt.com')) {
+       workerWindowId = null; // Reset
        throw new Error(`Page redirected or failed to load: ${tabInfo.url}`);
     }
 
@@ -57,10 +93,10 @@ async function handleOptimization(instruction, attempt = 1) {
       if (scriptResult && scriptResult.success) {
         return scriptResult.text;
       } else {
-        // Retry logic for specific recoverable errors
         if (attempt < 2 && scriptResult.error?.includes('UI Setup Failed')) {
-           console.warn('[CGPTOpt-Bg] UI Setup failed. Retrying one last time...');
-           await chrome.windows.remove(win.id).catch(() => {});
+           console.warn('[CGPTOpt-Bg] UI Setup failed. Retrying with fresh window...');
+           if (workerWindowId) await chrome.windows.remove(workerWindowId).catch(() => {});
+           workerWindowId = null;
            return handleOptimization(instruction, attempt + 1);
         }
         throw new Error(scriptResult?.error || 'Automation script returned failure');
@@ -71,17 +107,32 @@ async function handleOptimization(instruction, attempt = 1) {
   } catch (err) {
     if (attempt < 2) {
        console.warn('[CGPTOpt-Bg] Error in handleOptimization. Retrying...', err.message);
-       try { await chrome.windows.remove(win.id); } catch(e){}
+       if (workerWindowId) {
+         try { await chrome.windows.remove(workerWindowId); } catch(e){}
+         workerWindowId = null;
+       }
        return handleOptimization(instruction, attempt + 1);
     }
     throw err;
   } finally {
-    try {
-      setTimeout(() => {
-        chrome.windows.remove(win.id).catch(() => {});
-      }, 500); // Faster cleanup
-    } catch(e) {}
+    workerBusy = false;
+    // We DON'T remove the window here anymore to keep it for next time.
+    // We'll set a timeout to close it after 5 minutes of inactivity if needed.
+    resetInactivityTimer();
   }
+}
+
+let inactivityTimer = null;
+function resetInactivityTimer() {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(() => {
+    if (workerWindowId) {
+      chrome.windows.remove(workerWindowId).catch(() => {});
+      workerWindowId = null;
+      workerTabId = null;
+      console.log('[CGPTOpt-Bg] Worker window closed due to inactivity.');
+    }
+  }, 300000); // 5 minutes
 }
 
 function waitForTabComplete(tabId) {

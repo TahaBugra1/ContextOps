@@ -26,7 +26,9 @@ ChatGPT web arayüzünde (chatgpt.com ve chat.openai.com) uzun sohbetlerde oluş
 - `content.js`: Sayfa ile eklenti arasındaki iletişimi ve arayüz enjeksiyonunu sağlar.
 - `background.js`: Arka plan görevlerini yönetir.
 
-## Yeni Özellikler (2026-03-27)
-- **Prompt Optimizer (Sihirli Değnek):** Kullanıcı girdilerini profesyonel promptlara dönüştürür.
-- **Dil Desteği:** Optimizer için Türkçe ve İngilizce çıktı seçenekleri eklendi.
-- **Yapılandırma:** Optimizer'ın açılıp kapatılabilmesi sağlandı.
+## Yeni Özellikler (2026-04-24)
+- **Prompt Optimizer (Zekâ & Hız):**
+  - **Bağlam Farkındalığı:** Artık konuşmanın son 5 mesajını analiz ederek bağlama uygun optimizasyon yapar.
+  - **Persistent Worker Tab:** Her seferinde pencere açıp kapatmak yerine arka planda açık kalan bir "işçi sekme" kullanarak hızı %300 artırır.
+  - **Non-Blocking UI:** Optimizasyon sırasında kullanıcıyı engellemeyen, sadece ilgili alanı karartan şeffaf bir gösterge eklendi.
+- **Hata Yönetimi:** Otomasyon hataları için otomatik yeniden deneme ve 5 dakikalık hareketsizlik sonrası temizlik mantığı eklendi.

@@ -84,17 +84,23 @@
       overlay.className = 'cgptopt-magic-overlay';
       overlay.innerHTML = `
         <div class="cgptopt-magic-spinner">
-          <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
             <path d="M7.5 5.6L10 7L8.6 4.5L10 2L7.5 3.4L5 2L6.4 4.5L5 7L7.5 5.6M19.5 15.4L17 14L18.4 16.5L17 19L19.5 17.6L22 19L20.6 16.5L22 14L19.5 15.4M22 2L19.5 3.4L17 2L18.4 4.5L17 7L19.5 5.6L22 7L20.6 4.5L22 2"/>
           </svg>
         </div>
-        <div class="cgptopt-magic-text">Sihirli Değnek Çalışıyor...</div>
+        <div class="cgptopt-magic-text">Sihirli Değnek Hazırlanıyor...</div>
       `;
-      const container = document.getElementById('prompt-textarea')?.closest('main') || document.body;
-      container.style.position = 'relative';
-      container.appendChild(overlay);
+      // Append to body instead of main to avoid layout issues, but keep it positioned
+      document.body.appendChild(overlay);
     }
     overlay.classList.toggle('active', active);
+    
+    // Add a subtle blur/dim to the textarea area instead of blocking the whole screen
+    const textarea = document.getElementById('prompt-textarea');
+    if (textarea) {
+      textarea.style.opacity = active ? "0.5" : "1";
+      textarea.style.pointerEvents = active ? "none" : "auto";
+    }
   }
 
   function maybeShowActiveToast() {

@@ -7,6 +7,7 @@
   let isOptimizing = false;
   let optimizationResolver = null;
   let currentOptimizationRequestId = null;
+  let lastCurrentNode = null; // Track last seen current_node for context
  // Default fallback
   const EXTRA_KEY = 'cgpt_optimizer_extra_v1';
   const DEFAULTS = {
@@ -126,6 +127,7 @@
     if (!payload || !payload.mapping || !payload.current_node) return null;
 
     const mapping = payload.mapping;
+    lastCurrentNode = payload.current_node; // Capture node for context
     const path = buildPath(mapping, payload.current_node);
     if (path.length === 0) return null;
 
@@ -370,6 +372,26 @@ function generateUUID() {
   );
 }
 
+function getContextMessages() {
+  if (!currentMapping || !lastCurrentNode) {
+    console.log('[CGPTOpt] Context missing:', { hasMapping: !!currentMapping, node: lastCurrentNode });
+    return [];
+  }
+  
+  const path = buildPath(currentMapping, lastCurrentNode);
+  const visibleIds = path.filter(id => isVisibleMessageNode(currentMapping[id]));
+  
+  // Get last 5 messages for context
+  const last5Ids = visibleIds.slice(-5);
+  return last5Ids.map(id => {
+    const node = currentMapping[id];
+    const role = node.message.author.role;
+    const parts = node.message.content.parts || [];
+    const text = parts.join(' ').substring(0, 1000); // Truncate very long messages
+    return { role, text };
+  });
+}
+
 async function optimizePrompt(text) {
   if (!text || text.trim().length === 0) return null;
 
@@ -381,12 +403,21 @@ async function optimizePrompt(text) {
     window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-ui-lock', payload: { active: true } }, '*');
 
     const isTr = settings.optimizerLanguage === 'tr';
+    const context = getContextMessages();
     
+    let contextStr = "";
+    if (context.length > 0) {
+      contextStr = "\n\n### CURRENT CONVERSATION CONTEXT:\n" + 
+        context.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n');
+    }
+
     // REDESIGNED: Professional Prompt Engineering Template (CO-STAR Concept)
     const role = isTr ? "Kıdemli Prompt Mühendisi" : "Senior Prompt Engineer";
     const langRule = isTr ? "ÇIKTI DİLİ: Kesinlikle TÜRKÇE olmalıdır." : "OUTPUT LANGUAGE: Strictly ENGLISH.";
 
-    const systemPrompt = `You are a ${role}. Your goal is to transform the user's raw input into a world-class prompt.
+    const systemPrompt = `You are a ${role}. Your goal is to transform the user's raw input into a world-class prompt based on the conversation history.
+
+${contextStr}
 
 ### OBJECTIVE:
 Rewrite the provided text into a highly effective, professional, and structured prompt for an AI. 
@@ -403,6 +434,7 @@ Rewrite the provided text into a highly effective, professional, and structured 
 - RETURN ONLY the refined prompt text.
 - NO commentary, NO "Here is your prompt", NO conversational fillers.
 - Preserve the core intent but elevate the technical depth.
+- If the conversation context is provided, ensure the refined prompt is consistent with it.
 
 ### USER INPUT TO ENHANCE:
 "${text}"`;
