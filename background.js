@@ -32,12 +32,15 @@ let workerBusy = false;
  * Ensures the worker tab is open and ready
  */
 async function ensureWorkerTab() {
-  if (workerBusy) return;
-  
   let win = null;
   if (workerWindowId) {
     try {
       win = await chrome.windows.get(workerWindowId, { populate: true });
+      if (win && win.tabs && win.tabs.length > 0) {
+        workerTabId = win.tabs[0].id;
+      } else {
+        throw new Error('Window has no tabs');
+      }
     } catch (e) {
       workerWindowId = null;
       workerTabId = null;

@@ -180,6 +180,11 @@
     const finalRendered = Array.from(keptSet).filter(id => isVisibleMessageNode(mapping[id])).length;
     console.log(`[CGPTOpt] Trim Done. Visible kept: ${finalRendered}, Total path: ${path.length}`);
 
+    // Set conversation ID if not already set
+    const url = new URL(location.href);
+    const convId = url.pathname.split('/').pop();
+    if (convId && convId.length > 10) lastConversationId = convId;
+
     let root = payload.root;
     if (!keptSet.has(root)) root = path.find(id => keptSet.has(id)) || Array.from(keptSet)[0];
 
@@ -514,6 +519,8 @@ window.addEventListener('cgptopt-request-status', () => {
 patchFetch();
 postStatus({});
 
-// Initial Warmup
-window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-warmup-worker' }, '*');
+// Initial Warmup with delay to ensure listeners are ready
+setTimeout(() => {
+  window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-warmup-worker' }, '*');
+}, 2000);
 }) ();
