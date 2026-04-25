@@ -253,6 +253,10 @@
     } else if (event.data.type === 'cgptopt-ui-lock') {
       const { active } = event.data.payload || {};
       toggleMagicOverlay(active);
+    } else if (event.data.type === 'cgptopt-warmup-worker') {
+      chrome.runtime.sendMessage({ type: 'WARMUP_WORKER' });
+    } else if (event.data.type === 'cgptopt-reset-worker') {
+      chrome.runtime.sendMessage({ type: 'RESET_WORKER' });
     } else if (event.data.type === 'cgptopt-optimize-request') {
       const { instruction, requestId } = event.data.payload;
       chrome.runtime.sendMessage({ 

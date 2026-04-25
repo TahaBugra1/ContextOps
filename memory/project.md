@@ -32,3 +32,12 @@ ChatGPT web arayüzünde (chatgpt.com ve chat.openai.com) uzun sohbetlerde oluş
   - **Persistent Worker Tab:** Her seferinde pencere açıp kapatmak yerine arka planda açık kalan bir "işçi sekme" kullanarak hızı %300 artırır.
   - **Non-Blocking UI:** Optimizasyon sırasında kullanıcıyı engellemeyen, sadece ilgili alanı karartan şeffaf bir gösterge eklendi.
 - **Hata Yönetimi:** Otomasyon hataları için otomatik yeniden deneme ve 5 dakikalık hareketsizlik sonrası temizlik mantığı eklendi.
+
+## Gelişmiş Özellikler (2026-04-25)
+- **Lifecycle Management (Worker Tab):**
+  - **Warmup:** ChatGPT ilk açıldığında arka plan sekmeyi otomatik hazırlar (Gecikme süresi 0'a iner).
+  - **Auto-Reset:** Ana sohbet değiştiğinde (URL/ID bazlı) arka plan sekme hafızasını sıfırlar (Bağlam kirliliğini önler).
+- **Advanced Prompt Optimizer Skills:**
+  - **Chain of Thought (CoT):** Model artık yanıt vermeden önce analiz yapar, uzmanlık alanı belirler.
+  - **Few-Shot Learning:** Sistem komutuna eklenen örnekler sayesinde çok daha kaliteli çıktılar üretir.
+  - **XML Isolation:** `<FINAL_PROMPT>` etiketleri ile sadece temiz çıktının alınması garanti edilir.

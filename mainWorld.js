@@ -7,7 +7,8 @@
   let isOptimizing = false;
   let optimizationResolver = null;
   let currentOptimizationRequestId = null;
-  let lastCurrentNode = null; // Track last seen current_node for context
+  let lastCurrentNode = null; 
+  let lastConversationId = null; // Track current conversation for worker reset
  // Default fallback
   const EXTRA_KEY = 'cgpt_optimizer_extra_v1';
   const DEFAULTS = {
@@ -279,6 +280,17 @@
         }
       }
 
+      // Detect Conversation Change for Worker Reset
+      const convMatch = url.match(/\/backend-api\/conversation\/([a-zA-Z0-9-]+)/);
+      if (convMatch && method === 'GET') {
+        const newId = convMatch[1];
+        if (lastConversationId && lastConversationId !== newId) {
+          console.log('[CGPTOpt] Conversation changed. Resetting worker...');
+          window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-reset-worker' }, '*');
+        }
+        lastConversationId = newId;
+      }
+
       resetExtraAfterNewPrompt(url, method, init.body);
 
       if (!(settings.enabled && settings.autoTrim && isConversationGet(url, method))) {
@@ -411,7 +423,7 @@ async function optimizePrompt(text) {
         context.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n');
     }
 
-    // REDESIGNED: Professional Prompt Engineering Template (CO-STAR Concept)
+    // REDESIGNED: Professional Prompt Engineering Template (CO-STAR + Chain of Thought + Few-Shot)
     const role = isTr ? "Kıdemli Prompt Mühendisi" : "Senior Prompt Engineer";
     const langRule = isTr ? "ÇIKTI DİLİ: Kesinlikle TÜRKÇE olmalıdır." : "OUTPUT LANGUAGE: Strictly ENGLISH.";
 
@@ -422,18 +434,25 @@ ${contextStr}
 ### OBJECTIVE:
 Rewrite the provided text into a highly effective, professional, and structured prompt for an AI. 
 
-### STRUCTURE TO APPLY:
-1. **Persona/Role:** Define who the AI should act as.
-2. **Context:** Provide background information/scenario.
-3. **Task:** State clearly what needs to be done.
-4. **Constraints/Rules:** List negative constraints or style guides.
-5. **Output Format:** Define the expected structure (Markdown, Table, etc.).
+### INSTRUCTIONS:
+1. **Analyze:** Think about the user's intent, the required domain expertise, and the best persona.
+2. **Refine:** Use the CO-STAR (Context, Objective, Style, Tone, Audience, Response) framework.
+3. **Format:** Output ONLY the final prompt inside <FINAL_PROMPT> tags.
+
+### EXAMPLE:
+Input: "Write a blog about AI"
+Output: 
+<ANALYSIS>
+Intent: Blog writing about AI. Persona: Tech Journalist.
+</ANALYSIS>
+<FINAL_PROMPT>
+Act as an expert Tech Journalist. Write a 1000-word engaging blog post about the impact of Generative AI in 2025. Target audience: Business leaders. Tone: Professional yet accessible. Include a table of key trends.
+</FINAL_PROMPT>
 
 ### CRITICAL RULES:
 - ${langRule}
-- RETURN ONLY the refined prompt text.
-- NO commentary, NO "Here is your prompt", NO conversational fillers.
-- Preserve the core intent but elevate the technical depth.
+- RETURN the final result inside <FINAL_PROMPT> tags.
+- NO commentary outside the tags.
 - If the conversation context is provided, ensure the refined prompt is consistent with it.
 
 ### USER INPUT TO ENHANCE:
@@ -448,7 +467,12 @@ Rewrite the provided text into a highly effective, professional, and structured 
           window.removeEventListener('message', handleResult);
           cleanupOptimization();
           if (event.data.payload.success) {
-            resolve(event.data.payload.optimized);
+            // Extract from XML tag if present
+            let optimized = event.data.payload.optimized;
+            const match = optimized.match(/<FINAL_PROMPT>([\s\S]*?)<\/FINAL_PROMPT>/);
+            if (match) optimized = match[1].trim();
+            
+            resolve(optimized);
           } else {
             console.error('[CGPTOpt] Background Optimization Failed:', event.data.payload.error);
             resolve(null);
@@ -489,4 +513,7 @@ window.addEventListener('cgptopt-request-status', () => {
 
 patchFetch();
 postStatus({});
+
+// Initial Warmup
+window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-warmup-worker' }, '*');
 }) ();

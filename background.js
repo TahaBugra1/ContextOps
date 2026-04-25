@@ -12,6 +12,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: false, error: error.message });
       });
     return true; // Keep message channel open for async response
+  } else if (request.type === 'WARMUP_WORKER') {
+    ensureWorkerTab().then(() => sendResponse({ success: true }));
+    return true;
+  } else if (request.type === 'RESET_WORKER') {
+    resetWorkerTab().then(() => sendResponse({ success: true }));
+    return true;
   }
 });
 
@@ -23,47 +29,72 @@ let workerTabId = null;
 let workerBusy = false;
 
 /**
+ * Ensures the worker tab is open and ready
+ */
+async function ensureWorkerTab() {
+  if (workerBusy) return;
+  
+  let win = null;
+  if (workerWindowId) {
+    try {
+      win = await chrome.windows.get(workerWindowId, { populate: true });
+    } catch (e) {
+      workerWindowId = null;
+      workerTabId = null;
+    }
+  }
+
+  if (!win) {
+    console.log('[CGPTOpt-Bg] Creating fresh worker window...');
+    win = await chrome.windows.create({
+      url: 'https://chatgpt.com/?temporary-chat=true',
+      type: 'popup',
+      state: 'minimized',
+      focused: false
+    });
+    workerWindowId = win.id;
+    workerTabId = win.tabs[0].id;
+    await waitForTabComplete(workerTabId);
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  return win;
+}
+
+/**
+ * Resets the worker tab to a fresh state (new temporary chat)
+ */
+async function resetWorkerTab() {
+  if (!workerWindowId || workerBusy) return;
+  console.log('[CGPTOpt-Bg] Resetting worker tab (Context Clear)...');
+  try {
+    await chrome.tabs.update(workerTabId, { url: 'https://chatgpt.com/?temporary-chat=true' });
+    await waitForTabComplete(workerTabId);
+    await new Promise(r => setTimeout(r, 800));
+  } catch (e) {
+    workerWindowId = null;
+    await ensureWorkerTab();
+  }
+}
+
+/**
  * Handles the optimization by using a persistent hidden worker window
  */
 async function handleOptimization(instruction, attempt = 1) {
   if (workerBusy && attempt === 1) {
-    // If busy, wait a bit or try anyway (the queue logic could be added but let's keep it simple)
     await new Promise(r => setTimeout(r, 1000));
   }
   
   workerBusy = true;
 
   try {
-    let win = null;
-    if (workerWindowId) {
-      try {
-        win = await chrome.windows.get(workerWindowId, { populate: true });
-      } catch (e) {
-        workerWindowId = null;
-        workerTabId = null;
-      }
-    }
+    const win = await ensureWorkerTab();
+    const tab = win.tabs[0];
 
-    if (!win) {
-      win = await chrome.windows.create({
-        url: 'https://chatgpt.com/?temporary-chat=true',
-        type: 'popup',
-        state: 'minimized',
-        focused: false
-      });
-      workerWindowId = win.id;
-      workerTabId = win.tabs[0].id;
-      await waitForTabComplete(workerTabId);
-      await new Promise(r => setTimeout(r, 1500)); // Initial load needs more time
-    } else {
-      // Reuse existing tab - navigate to temporary chat to clear previous context if needed
-      // Or just stay on the page if it's already there
-      const tab = win.tabs[0];
-      if (!tab.url.includes('temporary-chat=true')) {
-        await chrome.tabs.update(tab.id, { url: 'https://chatgpt.com/?temporary-chat=true' });
-        await waitForTabComplete(tab.id);
-        await new Promise(r => setTimeout(r, 800));
-      }
+    // Navigation check
+    if (!tab.url.includes('temporary-chat=true')) {
+      await chrome.tabs.update(tab.id, { url: 'https://chatgpt.com/?temporary-chat=true' });
+      await waitForTabComplete(tab.id);
+      await new Promise(r => setTimeout(r, 800));
     }
 
     const tabId = workerTabId;
