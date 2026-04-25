@@ -1,39 +1,39 @@
-﻿{
+{
   "extensionName": {
     "message": "ChatGPT Optimizer"
   },
   "extensionDescription": {
-    "message": "Uzun sohbetlerde eski mesajlarÄ± render Ã¶ncesi kÄ±rparak yavaÅŸlamayÄ± azaltÄ±r. GeliÅŸtirici: lmehmetkaraca"
+    "message": "Uzun sohbetlerde eski mesajları render öncesi kırparak yavaşlamayı azaltır. Geliştirici: lmehmetkaraca"
   },
   "creatorLine": {
-    "message": "GeliÅŸtirici: Yusuf Ã‡inar & Taha BuÄŸra Ak"
+    "message": "Geliştirici: Yusuf Çinar & Taha Buğra Ak"
   },
   "activeLabel": {
     "message": "Aktif"
   },
   "enabledLabel": {
-    "message": "AÃ§Ä±k/KapalÄ±"
+    "message": "Açık/Kapalı"
   },
   "limitLabel": {
-    "message": "Mesaj SÄ±nÄ±rÄ± (Adet)"
+    "message": "Mesaj Sınırı (Adet)"
   },
   "apply": {
     "message": "Uygula"
   },
   "trimNow": {
-    "message": "Åimdi optimize et"
+    "message": "Şimdi optimize et"
   },
   "loadOlder": {
-    "message": "Daha eskileri gÃ¶ster"
+    "message": "Daha eskileri göster"
   },
   "hotReload": {
     "message": "Hot Reload"
   },
   "openSettings": {
-    "message": "AyarlarÄ± aÃ§"
+    "message": "Ayarları aç"
   },
   "statusPaused": {
-    "message": "DuraklatÄ±ldÄ±"
+    "message": "Duraklatıldı"
   },
   "statusKeeping": {
     "message": "Son $1 mesaj tutuluyor",
@@ -44,43 +44,43 @@
     }
   },
   "statusSearching": {
-    "message": "Sayfa hazÄ±rlanÄ±yor"
+    "message": "Sayfa hazırlanıyor"
   },
   "layoutUnsupported": {
-    "message": "Bu sayfa dÃ¼zeni desteklenmiyor"
+    "message": "Bu sayfa düzeni desteklenmiyor"
   },
   "activeToast": {
     "message": "Optimizer aktif"
   },
   "onlyChatgptScope": {
-    "message": "YalnÄ±zca ChatGPT sekmelerinde Ã§alÄ±ÅŸÄ±r"
+    "message": "Yalnızca ChatGPT sekmelerinde çalışır"
   },
   "openChatgptTab": {
-    "message": "Bu eklenti yalnÄ±zca ChatGPT sekmelerinde Ã§alÄ±ÅŸÄ±r"
+    "message": "Bu eklenti yalnızca ChatGPT sekmelerinde çalışır"
   },
   "openChatgptNow": {
-    "message": "ChatGPT AÃ§"
+    "message": "ChatGPT Aç"
   },
   "settingsTitle": {
-    "message": "ChatGPT Optimizer AyarlarÄ±"
+    "message": "ChatGPT Optimizer Ayarları"
   },
   "autoTrimLabel": {
     "message": "Otomatik optimize"
   },
   "showToolbarLabel": {
-    "message": "Sayfa iÃ§i araÃ§ Ã§ubuÄŸunu gÃ¶ster"
+    "message": "Sayfa içi araç çubuğunu göster"
   },
   "resetDefaults": {
-    "message": "VarsayÄ±lanlara dÃ¶n"
+    "message": "Varsayılanlara dön"
   },
   "savedStatus": {
     "message": "Ayarlar kaydedildi"
   },
   "resetDone": {
-    "message": "VarsayÄ±lanlar geri yÃ¼klendi"
+    "message": "Varsayılanlar geri yüklendi"
   },
   "olderNotRecoverable": {
-    "message": "$1 eski mesaj artÄ±k geri yÃ¼klenemiyor",
+    "message": "$1 eski mesaj artık geri yüklenemiyor",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -88,7 +88,7 @@
     }
   },
   "renderedLabel": {
-    "message": "gÃ¶sterilen"
+    "message": "gösterilen"
   },
   "hiddenLabel": {
     "message": "gizlenen"
@@ -97,27 +97,42 @@
     "message": "Sabitle"
   },
   "unstar": {
-    "message": "Sabitlemeyi KaldÄ±r"
+    "message": "Sabitlemeyi Kaldır"
   },
   "pinned": {
     "message": "Sabitlendi"
   },
   "idNotFound": {
-    "message": "Mesaj ID'si henÃ¼z belirlenmedi. LÃ¼tfen 1-2 saniye bekleyin."
+    "message": "Mesaj ID'si henüz belirlenmedi. Lütfen 1-2 saniye bekleyin."
   },
   "optimizerEnabledLabel": {
-    "message": "Sihirli DeÄŸnek (Prompt GeliÅŸtirici)"
+    "message": "Sihirli Değnek (Prompt Geliştirici)"
   },
   "optimizerLanguageLabel": {
-    "message": "Sihirli DeÄŸnek Ã‡Ä±ktÄ± Dili"
+    "message": "Sihirli Değnek Çıktı Dili"
   },
   "langTr": {
-    "message": "TÃ¼rkÃ§e"
+    "message": "Türkçe"
   },
   "langEn": {
-    "message": "Ä°ngilizce"
+    "message": "İngilizce"
   },
   "improvePrompt": {
-    "message": "Sihirli DeÄŸnek: Promptu GeliÅŸtir"
+    "message": "Sihirli Değnek: Promptu Geliştir"
+  },
+  "groqBoostTitle": {
+    "message": "Yıldırım Hızı (Groq Boost)"
+  },
+  "groqBoostDesc": {
+    "message": "Groq ile optimizasyonu 10x hızlandırın (Sadece 1 kez izin gerekir)."
+  },
+  "groqBoostBtn": {
+    "message": "Hemen Hızlandır"
+  },
+  "groqBoostActive": {
+    "message": "⚡ Yıldırım Hızı Aktif!"
+  },
+  "groqWait": {
+    "message": "Hızlandırılıyor, lütfen bekleyin..."
   }
 }

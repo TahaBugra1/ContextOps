@@ -127,6 +127,7 @@ async function init() {
   const debugEl = document.getElementById('debug');
   const connectGroqEl = document.getElementById('connectGroq');
   const groqStatusEl = document.getElementById('groqStatus');
+  const groqKeyDisplayEl = document.getElementById('groqKeyDisplay');
 
   const store = storageArea();
   const CONFIG_KEY = 'cgpt_optimizer_config_v1';
@@ -138,6 +139,10 @@ async function init() {
   if (settings.groq_key) {
     connectGroqEl.classList.add('hidden');
     groqStatusEl.classList.remove('hidden');
+    if (groqKeyDisplayEl) {
+      groqKeyDisplayEl.textContent = settings.groq_key.substring(0, 7) + '...' + settings.groq_key.slice(-4);
+      groqKeyDisplayEl.classList.remove('hidden');
+    }
   }
 
   const tab = await activeTab();
@@ -219,6 +224,10 @@ async function init() {
         await store.set({ [CONFIG_KEY]: settings });
         connectGroqEl.classList.add('hidden');
         groqStatusEl.classList.remove('hidden');
+        if (groqKeyDisplayEl) {
+          groqKeyDisplayEl.textContent = response.key.substring(0, 7) + '...' + response.key.slice(-4);
+          groqKeyDisplayEl.classList.remove('hidden');
+        }
         await notifyTab();
       } else {
         connectGroqEl.disabled = false;

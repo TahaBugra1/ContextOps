@@ -437,34 +437,57 @@ async function getGroqKeyFromConsole() {
     const extractionResult = await chrome.scripting.executeScript({
       target: { tabId },
       func: () => {
-        // Try to find any existing API key in the list
-        const bodyText = document.body.innerText;
-        const keyMatch = bodyText.match(/gsk_[a-zA-Z0-9]{40,}/);
-        if (keyMatch) return { success: true, key: keyMatch[0] };
+        const findKey = () => {
+          // Search in all text nodes and inputs
+          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+          let node;
+          while (node = walker.nextNode()) {
+            const match = node.textContent.match(/gsk_[a-zA-Z0-9]{40,}/);
+            if (match) return match[0];
+          }
+          // Search in inputs/textareas
+          const inputs = document.querySelectorAll('input, textarea');
+          for (const input of inputs) {
+            const match = input.value.match(/gsk_[a-zA-Z0-9]{40,}/);
+            if (match) return match[0];
+          }
+          return null;
+        };
+
+        const key = findKey();
+        if (key) return { success: true, key };
 
         // If not found, try to click "Create API Key"
-        const createBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Create API Key'));
+        const createBtn = Array.from(document.querySelectorAll('button')).find(b => 
+          b.innerText.toLowerCase().includes('create api key') || 
+          b.innerText.toLowerCase().includes('generate')
+        );
         if (createBtn) {
           createBtn.click();
           return { success: false, retry: true };
         }
-        return { success: false, error: 'Could not find or create key. Are you logged in?' };
+        return { success: false, error: 'Could not find or create key. Are you logged in to console.groq.com?' };
       }
     });
 
     let res = extractionResult[0].result;
     if (res.retry) {
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 3000)); // Give it more time
       // Second attempt to grab the newly created key
       const secondTry = await chrome.scripting.executeScript({
         target: { tabId },
         func: () => {
-          const bodyText = document.body.innerText;
-          const keyMatch = bodyText.match(/gsk_[a-zA-Z0-9]{40,}/);
-          return keyMatch ? { success: true, key: keyMatch[0] } : { success: false };
+          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+          let node;
+          while (node = walker.nextNode()) {
+            const match = node.textContent.match(/gsk_[a-zA-Z0-9]{40,}/);
+            if (match) return match[0];
+          }
+          return null;
         }
       });
-      res = secondTry[0].result;
+      const key = secondTry[0].result;
+      res = key ? { success: true, key } : { success: false };
     }
 
     if (res.success) return res;

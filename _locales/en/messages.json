@@ -1,42 +1,42 @@
-﻿{
+{
   "extensionName": {
     "message": "ChatGPT Optimizer"
   },
   "extensionDescription": {
-    "message": "Reduces lag by trimming old chat messages before they render in long conversations. Creator: lmehmetkaraca"
+    "message": "Reduces lag in long chats by trimming old messages before rendering."
   },
   "creatorLine": {
-    "message": "Creator: Yusuf Ã‡inar & Taha BuÄŸra Ak"
+    "message": "Developed by: Yusuf Cinar & Taha Bugra Ak"
   },
   "activeLabel": {
     "message": "Active"
   },
   "enabledLabel": {
-    "message": "ON/OFF"
+    "message": "Enabled"
   },
   "limitLabel": {
-    "message": "Message Limit (Bubbles)"
+    "message": "Message Limit (count)"
   },
   "apply": {
     "message": "Apply"
   },
   "trimNow": {
-    "message": "Optimize now"
+    "message": "Optimize Now"
   },
   "loadOlder": {
-    "message": "Load older"
+    "message": "Load Older"
   },
   "hotReload": {
     "message": "Hot Reload"
   },
   "openSettings": {
-    "message": "Open settings"
+    "message": "Open Settings"
   },
   "statusPaused": {
     "message": "Paused"
   },
   "statusKeeping": {
-    "message": "Keeping last: $1 messages",
+    "message": "Keeping last $1 messages",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -47,16 +47,16 @@
     "message": "Preparing page"
   },
   "layoutUnsupported": {
-    "message": "Layout not supported"
+    "message": "This page layout is not supported"
   },
   "activeToast": {
-    "message": "Optimizer is active"
+    "message": "Optimizer active"
   },
   "onlyChatgptScope": {
-    "message": "Works only on ChatGPT tabs"
+    "message": "Only works on ChatGPT tabs"
   },
   "openChatgptTab": {
-    "message": "This extension works only on ChatGPT tabs"
+    "message": "This extension only works on ChatGPT tabs"
   },
   "openChatgptNow": {
     "message": "Open ChatGPT"
@@ -65,13 +65,13 @@
     "message": "ChatGPT Optimizer Settings"
   },
   "autoTrimLabel": {
-    "message": "Auto optimize"
+    "message": "Auto-optimize"
   },
   "showToolbarLabel": {
     "message": "Show in-page toolbar"
   },
   "resetDefaults": {
-    "message": "Reset defaults"
+    "message": "Reset Defaults"
   },
   "savedStatus": {
     "message": "Settings saved"
@@ -80,7 +80,7 @@
     "message": "Defaults restored"
   },
   "olderNotRecoverable": {
-    "message": "$1 older messages can no longer be restored",
+    "message": "$1 older messages are no longer recoverable",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -91,22 +91,22 @@
     "message": "rendered"
   },
   "hiddenLabel": {
-    "message": "skipped"
+    "message": "hidden"
   },
   "star": {
-    "message": "Star"
+    "message": "Pin"
   },
   "unstar": {
-    "message": "Unstar"
+    "message": "Unpin"
   },
   "pinned": {
     "message": "Pinned"
   },
   "idNotFound": {
-    "message": "Message ID not found yet. Please wait a second."
+    "message": "Message ID not determined yet. Please wait 1-2 seconds."
   },
   "optimizerEnabledLabel": {
-    "message": "Magic Wand (Prompt Optimizer)"
+    "message": "Magic Wand (Prompt Enhancer)"
   },
   "optimizerLanguageLabel": {
     "message": "Magic Wand Output Language"
@@ -118,6 +118,21 @@
     "message": "English"
   },
   "improvePrompt": {
-    "message": "Magic Wand: Improve Prompt"
+    "message": "Magic Wand: Enhance Prompt"
+  },
+  "groqBoostTitle": {
+    "message": "Lightning Speed (Groq Boost)"
+  },
+  "groqBoostDesc": {
+    "message": "Speed up optimization by 10x with Groq (One-time permission required)."
+  },
+  "groqBoostBtn": {
+    "message": "Boost Now"
+  },
+  "groqBoostActive": {
+    "message": "⚡ Lightning Boost Active!"
+  },
+  "groqWait": {
+    "message": "Boosting, please wait..."
   }
 }
