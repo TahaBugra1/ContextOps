@@ -48,17 +48,21 @@ async function ensureWorkerTab() {
   }
 
   if (!win) {
-    console.log('[CGPTOpt-Bg] Creating fresh worker window...');
+    console.log('[CGPTOpt-Bg] Creating fresh worker window (off-screen)...');
     win = await chrome.windows.create({
       url: 'https://chatgpt.com/?temporary-chat=true',
       type: 'popup',
       state: 'minimized',
-      focused: false
+      focused: false,
+      left: -10000, // Off-screen
+      top: -10000,  // Off-screen
+      width: 400,
+      height: 400
     });
     workerWindowId = win.id;
     workerTabId = win.tabs[0].id;
     await waitForTabComplete(workerTabId);
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1500));
   }
   return win;
 }
@@ -103,7 +107,14 @@ async function handleOptimization(instruction, attempt = 1) {
     const tabId = workerTabId;
 
     // DEEP LOOK: Check if page is blank or errored before script injection
-    const tabInfo = await chrome.tabs.get(tabId);
+    let tabInfo = await chrome.tabs.get(tabId);
+    if (!tabInfo.url.includes('chatgpt.com') || tabInfo.status === 'loading') {
+       await chrome.tabs.reload(tabId);
+       await waitForTabComplete(tabId);
+       await new Promise(r => setTimeout(r, 1000));
+       tabInfo = await chrome.tabs.get(tabId);
+    }
+
     if (!tabInfo.url.includes('chatgpt.com')) {
        workerWindowId = null; // Reset
        throw new Error(`Page redirected or failed to load: ${tabInfo.url}`);
