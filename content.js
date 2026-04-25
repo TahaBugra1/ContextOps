@@ -41,8 +41,17 @@
     return chrome.storage.sync || chrome.storage.local;
   }
 
+  function isContextValid() {
+    return !!chrome.runtime && !!chrome.runtime.id;
+  }
+
   function t(key, substitutions) {
-    return chrome.i18n.getMessage(key, substitutions) || key;
+    try {
+      if (!isContextValid()) return key;
+      return chrome.i18n.getMessage(key, substitutions) || key;
+    } catch (e) {
+      return key;
+    }
   }
 
   function clamp(value, min, max) {
@@ -259,6 +268,10 @@
       chrome.runtime.sendMessage({ type: 'RESET_WORKER' });
     } else if (event.data.type === 'cgptopt-optimize-request') {
       const { instruction, requestId } = event.data.payload;
+      if (!isContextValid()) {
+         console.warn('[CGPTOpt] Context invalidated. Please refresh the page.');
+         return;
+      }
       chrome.runtime.sendMessage({ 
         type: 'OPTIMIZE_PROMPT_BACKGROUND', 
         payload: { instruction } 
@@ -316,6 +329,10 @@
 
   function setupObserver() {
     const observer = new MutationObserver(() => {
+      if (!isContextValid()) {
+        observer.disconnect();
+        return;
+      }
       injectStarButtons();
       injectPromptOptimizer();
     });
@@ -382,6 +399,7 @@
 
   function setupMessages() {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      if (!isContextValid()) return;
       if (!message || typeof message.type !== 'string') {
         return;
       }
@@ -432,6 +450,7 @@
       starredIds = Array.isArray(raw[STARRED_KEY]) ? raw[STARRED_KEY] : [];
       
       chrome.storage.onChanged.addListener((changes, areaName) => {
+        if (!isContextValid()) return;
         if (areaName !== 'sync' && areaName !== 'local') return;
         
         if (changes[CONFIG_KEY]) {
