@@ -489,7 +489,12 @@ Act as an expert Tech Journalist. Write a 1000-word engaging blog post about the
     window.postMessage({ 
       source: 'cgpt_optimizer_main', 
       type: 'cgptopt-optimize-request', 
-      payload: { instruction, requestId } 
+      payload: { 
+        instruction, 
+        requestId,
+        useGroq: !!settings.groq_key,
+        groqKey: settings.groq_key
+      } 
     }, '*');
   });
 }

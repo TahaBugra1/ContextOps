@@ -267,14 +267,14 @@
     } else if (event.data.type === 'cgptopt-reset-worker') {
       chrome.runtime.sendMessage({ type: 'RESET_WORKER' });
     } else if (event.data.type === 'cgptopt-optimize-request') {
-      const { instruction, requestId } = event.data.payload;
+      const { instruction, requestId, useGroq, groqKey } = event.data.payload;
       if (!isContextValid()) {
          console.warn('[CGPTOpt] Context invalidated. Please refresh the page.');
          return;
       }
       chrome.runtime.sendMessage({ 
         type: 'OPTIMIZE_PROMPT_BACKGROUND', 
-        payload: { instruction } 
+        payload: { instruction, useGroq, groqKey } 
       }, (response) => {
         window.postMessage({ 
           source: 'cgpt_optimizer_content', 

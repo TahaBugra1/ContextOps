@@ -1,4 +1,4 @@
-{
+﻿{
   "extensionName": {
     "message": "ChatGPT Optimizer"
   },
@@ -6,7 +6,7 @@
     "message": "Reduces lag by trimming old chat messages before they render in long conversations. Creator: lmehmetkaraca"
   },
   "creatorLine": {
-    "message": "Creator: Yusuf Çinar & Taha Buğra Ak"
+    "message": "Creator: Yusuf Ã‡inar & Taha BuÄŸra Ak"
   },
   "activeLabel": {
     "message": "Active"

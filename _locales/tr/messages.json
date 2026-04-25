@@ -1,39 +1,39 @@
-{
+﻿{
   "extensionName": {
     "message": "ChatGPT Optimizer"
   },
   "extensionDescription": {
-    "message": "Uzun sohbetlerde eski mesajları render öncesi kırparak yavaşlamayı azaltır. Geliştirici: lmehmetkaraca"
+    "message": "Uzun sohbetlerde eski mesajlarÄ± render Ã¶ncesi kÄ±rparak yavaÅŸlamayÄ± azaltÄ±r. GeliÅŸtirici: lmehmetkaraca"
   },
   "creatorLine": {
-    "message": "Geliştirici: Yusuf Çinar & Taha Buğra Ak"
+    "message": "GeliÅŸtirici: Yusuf Ã‡inar & Taha BuÄŸra Ak"
   },
   "activeLabel": {
     "message": "Aktif"
   },
   "enabledLabel": {
-    "message": "Açık/Kapalı"
+    "message": "AÃ§Ä±k/KapalÄ±"
   },
   "limitLabel": {
-    "message": "Mesaj Sınırı (Adet)"
+    "message": "Mesaj SÄ±nÄ±rÄ± (Adet)"
   },
   "apply": {
     "message": "Uygula"
   },
   "trimNow": {
-    "message": "Şimdi optimize et"
+    "message": "Åimdi optimize et"
   },
   "loadOlder": {
-    "message": "Daha eskileri göster"
+    "message": "Daha eskileri gÃ¶ster"
   },
   "hotReload": {
     "message": "Hot Reload"
   },
   "openSettings": {
-    "message": "Ayarları aç"
+    "message": "AyarlarÄ± aÃ§"
   },
   "statusPaused": {
-    "message": "Duraklatıldı"
+    "message": "DuraklatÄ±ldÄ±"
   },
   "statusKeeping": {
     "message": "Son $1 mesaj tutuluyor",
@@ -44,43 +44,43 @@
     }
   },
   "statusSearching": {
-    "message": "Sayfa hazırlanıyor"
+    "message": "Sayfa hazÄ±rlanÄ±yor"
   },
   "layoutUnsupported": {
-    "message": "Bu sayfa düzeni desteklenmiyor"
+    "message": "Bu sayfa dÃ¼zeni desteklenmiyor"
   },
   "activeToast": {
     "message": "Optimizer aktif"
   },
   "onlyChatgptScope": {
-    "message": "Yalnızca ChatGPT sekmelerinde çalışır"
+    "message": "YalnÄ±zca ChatGPT sekmelerinde Ã§alÄ±ÅŸÄ±r"
   },
   "openChatgptTab": {
-    "message": "Bu eklenti yalnızca ChatGPT sekmelerinde çalışır"
+    "message": "Bu eklenti yalnÄ±zca ChatGPT sekmelerinde Ã§alÄ±ÅŸÄ±r"
   },
   "openChatgptNow": {
-    "message": "ChatGPT Aç"
+    "message": "ChatGPT AÃ§"
   },
   "settingsTitle": {
-    "message": "ChatGPT Optimizer Ayarları"
+    "message": "ChatGPT Optimizer AyarlarÄ±"
   },
   "autoTrimLabel": {
     "message": "Otomatik optimize"
   },
   "showToolbarLabel": {
-    "message": "Sayfa içi araç çubuğunu göster"
+    "message": "Sayfa iÃ§i araÃ§ Ã§ubuÄŸunu gÃ¶ster"
   },
   "resetDefaults": {
-    "message": "Varsayılanlara dön"
+    "message": "VarsayÄ±lanlara dÃ¶n"
   },
   "savedStatus": {
     "message": "Ayarlar kaydedildi"
   },
   "resetDone": {
-    "message": "Varsayılanlar geri yüklendi"
+    "message": "VarsayÄ±lanlar geri yÃ¼klendi"
   },
   "olderNotRecoverable": {
-    "message": "$1 eski mesaj artık geri yüklenemiyor",
+    "message": "$1 eski mesaj artÄ±k geri yÃ¼klenemiyor",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -88,7 +88,7 @@
     }
   },
   "renderedLabel": {
-    "message": "gösterilen"
+    "message": "gÃ¶sterilen"
   },
   "hiddenLabel": {
     "message": "gizlenen"
@@ -97,27 +97,27 @@
     "message": "Sabitle"
   },
   "unstar": {
-    "message": "Sabitlemeyi Kaldır"
+    "message": "Sabitlemeyi KaldÄ±r"
   },
   "pinned": {
     "message": "Sabitlendi"
   },
   "idNotFound": {
-    "message": "Mesaj ID'si henüz belirlenmedi. Lütfen 1-2 saniye bekleyin."
+    "message": "Mesaj ID'si henÃ¼z belirlenmedi. LÃ¼tfen 1-2 saniye bekleyin."
   },
   "optimizerEnabledLabel": {
-    "message": "Sihirli Değnek (Prompt Geliştirici)"
+    "message": "Sihirli DeÄŸnek (Prompt GeliÅŸtirici)"
   },
   "optimizerLanguageLabel": {
-    "message": "Sihirli Değnek Çıktı Dili"
+    "message": "Sihirli DeÄŸnek Ã‡Ä±ktÄ± Dili"
   },
   "langTr": {
-    "message": "Türkçe"
+    "message": "TÃ¼rkÃ§e"
   },
   "langEn": {
-    "message": "İngilizce"
+    "message": "Ä°ngilizce"
   },
   "improvePrompt": {
-    "message": "Sihirli Değnek: Promptu Geliştir"
+    "message": "Sihirli DeÄŸnek: Promptu GeliÅŸtir"
   }
 }

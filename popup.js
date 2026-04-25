@@ -5,7 +5,8 @@ const DEFAULTS = {
   autoTrim: true,
   showToolbar: false,
   optimizerEnabled: true,
-  optimizerLanguage: 'en'
+  optimizerLanguage: 'en',
+  groq_key: null
 };
 
 const LIMIT_MIN = 1;
@@ -31,7 +32,8 @@ function sanitize(raw) {
     autoTrim: typeof raw.autoTrim === 'boolean' ? raw.autoTrim : DEFAULTS.autoTrim,
     showToolbar: typeof raw.showToolbar === 'boolean' ? raw.showToolbar : DEFAULTS.showToolbar,
     optimizerEnabled: typeof raw.optimizerEnabled === 'boolean' ? raw.optimizerEnabled : DEFAULTS.optimizerEnabled,
-    optimizerLanguage: (raw.optimizerLanguage === 'en' || raw.optimizerLanguage === 'tr') ? raw.optimizerLanguage : DEFAULTS.optimizerLanguage
+    optimizerLanguage: (raw.optimizerLanguage === 'en' || raw.optimizerLanguage === 'tr') ? raw.optimizerLanguage : DEFAULTS.optimizerLanguage,
+    groq_key: typeof raw.groq_key === 'string' ? raw.groq_key : DEFAULTS.groq_key
   };
 }
 
@@ -123,6 +125,8 @@ async function init() {
   const scopeNoteEl = document.getElementById('scopeNote');
   const statusEl = document.getElementById('status');
   const debugEl = document.getElementById('debug');
+  const connectGroqEl = document.getElementById('connectGroq');
+  const groqStatusEl = document.getElementById('groqStatus');
 
   const store = storageArea();
   const CONFIG_KEY = 'cgpt_optimizer_config_v1';
@@ -130,6 +134,11 @@ async function init() {
   enabledEl.checked = settings.enabled;
   limitEl.value = String(settings.limit);
   scopeNoteEl.textContent = t('onlyChatgptScope');
+
+  if (settings.groq_key) {
+    connectGroqEl.classList.add('hidden');
+    groqStatusEl.classList.remove('hidden');
+  }
 
   const tab = await activeTab();
   const supported = Boolean(tab && isSupportedUrl(tab.url));
@@ -198,6 +207,25 @@ async function init() {
     hotReloadEl.disabled = true;
     await chrome.tabs.reload(tabId);
     window.close();
+  });
+
+  connectGroqEl.addEventListener('click', async () => {
+    connectGroqEl.disabled = true;
+    connectGroqEl.textContent = t('groqWait');
+    
+    chrome.runtime.sendMessage({ type: 'GET_GROQ_KEY' }, async (response) => {
+      if (response && response.success) {
+        settings.groq_key = response.key;
+        await store.set({ [CONFIG_KEY]: settings });
+        connectGroqEl.classList.add('hidden');
+        groqStatusEl.classList.remove('hidden');
+        await notifyTab();
+      } else {
+        connectGroqEl.disabled = false;
+        connectGroqEl.textContent = t('groqBoostBtn');
+        alert(response?.error || 'Groq connection failed. Please ensure you are logged in to console.groq.com');
+      }
+    });
   });
 }
 
