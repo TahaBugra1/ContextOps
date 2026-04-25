@@ -181,8 +181,6 @@
     console.log(`[CGPTOpt] Trim Done. Visible kept: ${finalRendered}, Total path: ${path.length}`);
 
     // Set conversation ID if not already set
-    const url = new URL(location.href);
-    const convId = url.pathname.split('/').pop();
     if (convId && convId.length > 10) lastConversationId = convId;
 
     let root = payload.root;
