@@ -18,14 +18,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
          });
     }
     return true; 
-  } else if (request.type === 'WARMUP_WORKER') {
-    ensureWorkerTab().then(() => sendResponse({ success: true }));
-    return true;
   } else if (request.type === 'RESET_WORKER') {
     resetWorkerTab().then(() => sendResponse({ success: true }));
     return true;
-  } else if (request.type === 'GET_GROQ_KEY') {
-    getGroqKeyFromConsole().then(res => sendResponse(res));
+  } else if (request.type === 'CLOSE_CURRENT_TAB') {
+    if (sender && sender.tab && sender.tab.id) {
+      chrome.tabs.remove(sender.tab.id).catch(e => console.error(e));
+    }
     return true;
   }
 });
@@ -61,12 +60,11 @@ async function ensureWorkerTab() {
     win = await chrome.windows.create({
       url: 'https://chatgpt.com/?temporary-chat=true',
       type: 'popup',
-      state: 'minimized',
       focused: false,
-      left: -10000, // Off-screen
-      top: -10000,  // Off-screen
-      width: 400,
-      height: 400
+      left: 100, // Small window at edge
+      top: 100,
+      width: 200,
+      height: 200
     });
     workerWindowId = win.id;
     workerTabId = win.tabs[0].id;
@@ -408,95 +406,9 @@ async function automateChatGPT(instruction) {
       }
     });
 
-    return { success: true, text, trace };
-  } catch (err) {
-    log(`FATAL: ${err.message}`);
-    return { success: false, error: err.message, trace };
-  }
-}
-
-/**
- * Automates key extraction from console.groq.com
- */
-async function getGroqKeyFromConsole() {
-  let tempWin = null;
-  try {
-    // 1. Open Groq console
-    tempWin = await chrome.windows.create({
-      url: 'https://console.groq.com/keys',
-      type: 'popup',
-      state: 'minimized',
-      focused: false,
-      left: -10000, top: -10000
-    });
-    const tabId = tempWin.tabs[0].id;
-    await waitForTabComplete(tabId);
-    await new Promise(r => setTimeout(r, 2000)); // Wait for JS load
-
-    // 2. Try to find an existing key or create one
-    const extractionResult = await chrome.scripting.executeScript({
-      target: { tabId },
-      func: () => {
-        const findKey = () => {
-          // Search in all text nodes and inputs
-          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-          let node;
-          while (node = walker.nextNode()) {
-            const match = node.textContent.match(/gsk_[a-zA-Z0-9]{40,}/);
-            if (match) return match[0];
-          }
-          // Search in inputs/textareas
-          const inputs = document.querySelectorAll('input, textarea');
-          for (const input of inputs) {
-            const match = input.value.match(/gsk_[a-zA-Z0-9]{40,}/);
-            if (match) return match[0];
-          }
-          return null;
-        };
-
-        const key = findKey();
-        if (key) return { success: true, key };
-
-        // If not found, try to click "Create API Key"
-        const createBtn = Array.from(document.querySelectorAll('button')).find(b => 
-          b.innerText.toLowerCase().includes('create api key') || 
-          b.innerText.toLowerCase().includes('generate')
-        );
-        if (createBtn) {
-          createBtn.click();
-          return { success: false, retry: true };
-        }
-        return { success: false, error: 'Could not find or create key. Are you logged in to console.groq.com?' };
-      }
-    });
-
-    let res = extractionResult[0].result;
-    if (res.retry) {
-      await new Promise(r => setTimeout(r, 3000)); // Give it more time
-      // Second attempt to grab the newly created key
-      const secondTry = await chrome.scripting.executeScript({
-        target: { tabId },
-        func: () => {
-          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-          let node;
-          while (node = walker.nextNode()) {
-            const match = node.textContent.match(/gsk_[a-zA-Z0-9]{40,}/);
-            if (match) return match[0];
-          }
-          return null;
-        }
-      });
-      const key = secondTry[0].result;
-      res = key ? { success: true, key } : { success: false };
-    }
-
-    if (res.success) return res;
-    throw new Error(res.error || 'Failed to extract key');
-
+    return { success: true, text: lastCapturedText };
   } catch (err) {
     return { success: false, error: err.message };
-  } finally {
-    if (tempWin) chrome.windows.remove(tempWin.id).catch(() => {});
   }
 }
 
@@ -505,9 +417,9 @@ async function getGroqKeyFromConsole() {
  */
 async function handleGroqOptimization(instruction, apiKey) {
   const systemPrompt = `You are an expert Prompt Engineer. 
-Optimize the user's prompt using CO-STAR framework and Chain of Thought.
+Optimize the user's prompt using CO-STAR framework (Context, Objective, Style, Tone, Audience, Response).
 Wrap the final optimized prompt inside <FINAL_PROMPT> tags.
-Do not provide any other explanation.`;
+Do not provide any other explanation or text outside the tags.`;
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -517,21 +429,35 @@ Do not provide any other explanation.`;
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Optimize this prompt: ${instruction}` }
         ],
-        temperature: 0.7
+        temperature: 0.6
       })
     });
 
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `HTTP ${response.status}`);
+    }
+
     const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
-    
-    const optimized = data.choices[0].message.content;
+    let optimized = data.choices[0].message.content;
+
+    // Extract content from <FINAL_PROMPT> tags if present
+    const match = optimized.match(/<FINAL_PROMPT>([\s\S]*?)<\/FINAL_PROMPT>/i);
+    if (match && match[1]) {
+      optimized = match[1].trim();
+    } else {
+      // Fallback: clean any leftover XML-like tags
+      optimized = optimized.replace(/<\/?FINAL_PROMPT>/gi, '').trim();
+    }
+
     return { success: true, optimized };
   } catch (err) {
+    console.error('[CGPTOpt-Bg] Groq Error:', err);
     return { success: false, error: 'Groq API Error: ' + err.message };
   }
 }

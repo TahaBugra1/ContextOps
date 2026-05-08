@@ -87,42 +87,117 @@
   animation: cgptopt-spin 1s infinite linear;
 }
 
-.cgptopt-magic-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(13, 18, 25, 0.85);
-  backdrop-filter: blur(8px);
-  z-index: 9999;
-  display: flex !important;
-  flex-direction: column;
-  items-center: center;
-  justify-content: center;
-  color: white;
-  border-radius: 12px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
+@keyframes cgptopt-shine {
+  to { background-position: 200% center; }
 }
 
-.cgptopt-magic-overlay.active {
+@keyframes cgptopt-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Commands Menu Styles */
+.cgptopt-optimizer-wrapper {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2147483647 !important;
+  pointer-events: auto;
+  padding: 4px;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cgptopt-optimize-btn {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white !important;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 0;
+}
+
+.cgptopt-optimize-btn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.cgptopt-menu-trigger {
+  width: 24px;
+  height: 32px;
+  background: #1e293b;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.cgptopt-menu-trigger svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cgptopt-commands-menu {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: 0;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 2147483647 !important;
+}
+
+.cgptopt-commands-menu.show {
   opacity: 1;
+  transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 
-.cgptopt-magic-text {
-  font-size: 18px;
+.cgptopt-menu-item {
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 13px;
   font-weight: 600;
-  margin-top: 15px;
-  background: linear-gradient(90deg, #6366f1, #ec4899, #6366f1);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: cgptopt-shine 3s linear infinite;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
 }
 
-@keyframes cgptopt-shine {
-  to { background-position: 200% center; }
+.cgptopt-menu-item:hover {
+  background: rgba(99, 102, 241, 0.25);
+  color: #fff;
+  transform: translateX(6px);
+}
+
+.cgptopt-menu-item svg {
+  opacity: 0.7;
 }

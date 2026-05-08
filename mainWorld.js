@@ -18,7 +18,9 @@
     autoTrim: true,
     showToolbar: false,
     optimizerEnabled: true,
-    optimizerLanguage: 'en'
+    optimizerLanguage: 'en',
+    groq_key: '',
+    selectedStyles: ['/spec', '/cot', '/feynman', '/socratic', '/step']
   };
 
   let settings = loadSettings();
@@ -45,6 +47,8 @@
       showToolbar: typeof raw.showToolbar === 'boolean' ? raw.showToolbar : DEFAULTS.showToolbar,
       optimizerEnabled: typeof raw.optimizerEnabled === 'boolean' ? raw.optimizerEnabled : DEFAULTS.optimizerEnabled,
       optimizerLanguage: (raw.optimizerLanguage === 'en' || raw.optimizerLanguage === 'tr') ? raw.optimizerLanguage : DEFAULTS.optimizerLanguage,
+      groq_key: typeof raw.groq_key === 'string' ? raw.groq_key : DEFAULTS.groq_key,
+      selectedStyles: Array.isArray(raw.selectedStyles) ? raw.selectedStyles : DEFAULTS.selectedStyles,
       starredIds: Array.isArray(raw.starredIds) ? raw.starredIds : (Array.isArray(settings?.starredIds) ? settings.starredIds : [])
     };
   }
@@ -411,26 +415,276 @@ async function optimizePrompt(text) {
   if (!text || text.trim().length === 0) return null;
 
   return new Promise((resolve) => {
+    if (!settings.groq_key || settings.groq_key.trim().length === 0) {
+      window.postMessage({ 
+        source: 'cgpt_optimizer_main', 
+        type: 'cgptopt-status-toast', 
+        payload: { message: settings.optimizerLanguage === 'tr' ? "Hata: API Anahtarı girilmemiş! Lütfen ayarlara gidin." : "Error: API Key missing! Please go to settings." } 
+      }, '*');
+      resolve(null);
+      return;
+    }
+
     const requestId = generateUUID();
     isOptimizing = true;
-
-    // Show overlay
-    window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-ui-lock', payload: { active: true } }, '*');
-
     const isTr = settings.optimizerLanguage === 'tr';
     const context = getContextMessages();
     
+    // Command detection
+    let command = null;
+    let userText = text.trim();
+    if (userText.startsWith('/')) {
+      const firstSpace = userText.indexOf(' ');
+      if (firstSpace > 0) {
+        command = userText.substring(0, firstSpace).toLowerCase();
+        userText = userText.substring(firstSpace).trim();
+      } else {
+        command = userText.toLowerCase();
+        userText = "";
+      }
+    }
+
+    // Show overlay with command specific message
+    let statusMsg = isTr ? "Sihirli Değnek Hazırlanıyor..." : "Magic Wand Preparing...";
+    if (command === '/image') statusMsg = isTr ? "Görsel Promptu Hazırlanıyor..." : "Image Prompt Preparing...";
+    else if (command === '/makale') statusMsg = isTr ? "Makale Promptu Hazırlanıyor..." : "Article Prompt Preparing...";
+    else if (command === '/mail') statusMsg = isTr ? "E-posta Promptu Hazırlanıyor..." : "Email Prompt Preparing...";
+
+    window.postMessage({ 
+      source: 'cgpt_optimizer_main', 
+      type: 'cgptopt-ui-lock', 
+      payload: { active: true, message: statusMsg } 
+    }, '*');
+
     let contextStr = "";
     if (context.length > 0) {
       contextStr = "\n\n### CURRENT CONVERSATION CONTEXT:\n" + 
         context.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n');
     }
 
-    // REDESIGNED: Professional Prompt Engineering Template (CO-STAR + Chain of Thought + Few-Shot)
-    const role = isTr ? "Kıdemli Prompt Mühendisi" : "Senior Prompt Engineer";
-    const langRule = isTr ? "ÇIKTI DİLİ: Kesinlikle TÜRKÇE olmalıdır." : "OUTPUT LANGUAGE: Strictly ENGLISH.";
+    // Role and Template Definitions
+    const PROMPT_STYLES = {
+      '/spec': {
+        icon: '📐', tr: 'SPEC Yöntemi', en: 'SPEC Method',
+        desc: 'Specificity, Purpose, Evidence, Constraints odaklı yapılandırılmış prompt.'
+      },
+      '/cot': {
+        icon: '🧠', tr: 'Chain of Thought', en: 'Chain of Thought',
+        desc: 'Adım adım düşünme ve mantık yürütme sürecini tetikler.'
+      },
+      '/feynman': {
+        icon: '👶', tr: 'Feynman Tekniği', en: 'Feynman Technique',
+        desc: 'Karmaşık konuları en basit haliyle, bir çocuğa anlatır gibi açıklar.'
+      },
+      '/socratic': {
+        icon: '🏛️', tr: 'Sokratik Yöntem', en: 'Socratic Method',
+        desc: 'Soru-cevap yoluyla derinlemesine öğrenme ve keşif sağlar.'
+      },
+      '/step': {
+        icon: '🪜', tr: 'Adım Adım', en: 'Step-by-Step',
+        desc: 'Görevi küçük, yönetilebilir parçalara ayırarak ilerler.'
+      },
+      '/tot': {
+        icon: '🌳', tr: 'Tree of Thoughts', en: 'Tree of Thoughts',
+        desc: 'Farklı çözüm yollarını dallandırarak en iyisini bulur.'
+      },
+      '/first': {
+        icon: '🧱', tr: 'İlk İlkeler', en: 'First Principles',
+        desc: 'Konuyu temel gerçeklerine indirgeyerek yeniden inşa eder.'
+      },
+      '/few': {
+        icon: '💡', tr: 'Few-Shot', en: 'Few-Shot',
+        desc: 'Örnekler vererek yapay zekanın istenen formatı anlamasını sağlar.'
+      },
+      '/expert': {
+        icon: '🎓', tr: 'Uzman Görüşü', en: 'Expert Perspective',
+        desc: 'Konuyu ilgili alanın en iyisi olan bir uzman gözüyle ele alır.'
+      },
+      '/debate': {
+        icon: '⚖️', tr: 'Münazara Modu', en: 'Debate Mode',
+        desc: 'Konuyu farklı taraflardan savunarak objektif analiz yapar.'
+      },
+      '/table': {
+        icon: '📊', tr: 'Tablo Formatı', en: 'Tabular Output',
+        desc: 'Verileri ve açıklamaları düzenli tablolar halinde sunar.'
+      },
+      '/critic': {
+        icon: '🧐', tr: 'Eleştirel Analiz', en: 'Critical Analysis',
+        desc: 'Kendi yanıtını eleştirip geliştirerek en mükemmel hali sunar.'
+      },
+      '/analog': {
+        icon: '🔗', tr: 'Analoji Kurma', en: 'Analogy Making',
+        desc: 'Soyut kavramları somut benzerliklerle açıklar.'
+      },
+      '/code': {
+        icon: '💻', tr: 'Kod Mantığı', en: 'Code Logic',
+        desc: 'Açıklamaları algoritma ve mantıksal akış şeması şeklinde sunar.'
+      },
+      '/negative': {
+        icon: '🚫', tr: 'Negatif Sınır', en: 'Negative Constraints',
+        desc: 'Nelerin yapılmaması gerektiğini belirterek hassas sonuç üretir.'
+      },
+      '/creative': {
+        icon: '🎭', tr: 'Yaratıcı Hikaye', en: 'Creative Story',
+        desc: 'Bilgiyi ilgi çekici bir kurgu veya hikaye içinde sunar.'
+      },
+      '/risks': {
+        icon: '⚠️', tr: 'Risk Analizi', en: 'Risk Analysis',
+        desc: 'Konunun potansiyel tehlikelerini ve çözüm yollarını listeler.'
+      },
+      '/future': {
+        icon: '🔮', tr: 'Gelecek Öngörüsü', en: 'Future Foresight',
+        desc: 'Trendlere dayanarak konunun gelecekteki gelişimini tahmin eder.'
+      },
+      '/summary': {
+        icon: '📉', tr: 'Yönetici Özeti', en: 'Executive Summary',
+        desc: 'Sadece en kritik bilgileri içeren kısa ve öz rapor sunar.'
+      },
+      '/interact': {
+        icon: '💬', tr: 'Etkileşimli', en: 'Interactive Mode',
+        desc: 'Yanıt vermeden önce eksik bilgileri size sorar.'
+      }
+    };
 
-    const systemPrompt = `You are a ${role}. Your goal is to transform the user's raw input into a world-class prompt based on the conversation history.
+    const roles = {
+      '/image': {
+        en: "Senior AI Image Prompt Engineer (Midjourney/DALL-E Expert)",
+        tr: "Kıdemli Yapay Zeka Görsel Prompt Mühendisi (Midjourney/DALL-E Uzmanı)"
+      },
+      '/makale': {
+        en: "Expert SEO Content Writer and Strategist",
+        tr: "Uzman SEO İçerik Yazarı ve Stratejisti"
+      },
+      '/mail': {
+        en: "Professional Corporate Communications Specialist",
+        tr: "Profesyonel Kurumsal İletişim Uzmanı"
+      },
+      '/spec': {
+        en: "Technical Document Specialist using SPEC Framework",
+        tr: "SPEC Çerçevesini kullanan Teknik Doküman Uzmanı"
+      },
+      '/cot': {
+        en: "Logical Reasoning Specialist using Chain of Thought",
+        tr: "Chain of Thought kullanan Mantıksal Akıl Yürütme Uzmanı"
+      },
+      '/feynman': {
+        en: "Expert Educator specializing in the Feynman Technique",
+        tr: "Feynman Tekniği konusunda uzmanlaşmış Eğitimci"
+      },
+      '/socratic': {
+        en: "Philosophical Inquirer using the Socratic Method",
+        tr: "Sokratik Yöntemi kullanan Felsefi Sorgulayıcı"
+      },
+      '/tot': {
+        en: "Strategic Planner using Tree of Thoughts",
+        tr: "Tree of Thoughts kullanan Stratejik Planlamacı"
+      },
+      default: {
+        en: "Senior Prompt Engineer",
+        tr: "Kıdemli Prompt Mühendisi"
+      }
+    };
+
+    const selectedRole = roles[command] || roles.default;
+    const roleName = isTr ? selectedRole.tr : selectedRole.en;
+    const langRule = isTr ? "OUTPUT LANGUAGE: Strictly TÜRKÇE." : "OUTPUT LANGUAGE: Strictly ENGLISH.";
+
+    let taskInstruction = "";
+    if (command === '/image') {
+      taskInstruction = isTr ? 
+        "GÖREV: Kullanıcının görsel fikrini Midjourney veya DALL-E için son derece detaylı, sanatsal ve teknik (ışık, lens, stil) bir prompta dönüştür." :
+        "TASK: Transform the user's visual idea into a highly detailed, artistic, and technical (lighting, lens, style) prompt for Midjourney or DALL-E.";
+    } else if (command === '/makale') {
+      taskInstruction = isTr ?
+        "GÖREV: Kullanıcının konusunu SEO uyumlu, başlıkları belirlenmiş, derinlemesine bir makale yazdıracak profesyonel bir prompta dönüştür." :
+        "TASK: Transform the user's topic into a professional prompt for writing an in-depth, SEO-optimized article with predefined headings.";
+    } else if (command === '/mail') {
+      taskInstruction = isTr ?
+        "GÖREV: Kullanıcının mesajını profesyonel, nazik ve etkileyici bir kurumsal e-posta taslağı oluşturacak mükemmel bir prompta dönüştür." :
+        "TASK: Transform the user's message into a perfect prompt for creating a professional, polite, and impactful corporate email draft.";
+    } else if (command === '/spec') {
+      taskInstruction = isTr ?
+        "YÖNTEM: SPEC (Specificity, Purpose, Evidence, Constraints). Kullanıcının isteğini; Belirginlik, Amaç, Kanıt Gereksinimi ve Kısıtlamalar içeren çok katmanlı bir teknik prompta dönüştür." :
+        "METHOD: SPEC (Specificity, Purpose, Evidence, Constraints). Transform the request into a multi-layered technical prompt focusing on Specificity, Purpose, Evidence, and Constraints.";
+    } else if (command === '/cot') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Chain of Thought (CoT). Yapay zekanın sonucu vermeden önce adım adım akıl yürütmesini ve her aşamayı açıklamasını sağlayacak bir prompt oluştur." :
+        "METHOD: Chain of Thought (CoT). Create a prompt that forces the AI to reason step-by-step and explain each stage before providing the final output.";
+    } else if (command === '/feynman') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Feynman Tekniği. Konuyu sanki 5 yaşındaki bir çocuğa veya teknik bilgisi olmayan birine anlatıyormuş gibi, analojiler kullanarak basitleştirecek bir prompt hazırla." :
+        "METHOD: Feynman Technique. Prepare a prompt to explain the topic simply using analogies, as if explaining to a 5-year-old or a non-technical person.";
+    } else if (command === '/socratic') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Sokratik Yöntem. Yapay zekanın doğrudan cevap vermek yerine, kullanıcıya doğru soruları sorarak konuyu keşfetmesini sağlayacak bir prompt oluştur." :
+        "METHOD: Socratic Method. Create a prompt where the AI asks the user the right questions to explore the topic instead of giving a direct answer.";
+    } else if (command === '/tot') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Tree of Thoughts. Sorunu farklı açılardan ele alacak, birden fazla çözüm yolu (dallar) geliştirecek ve en mantıklı olanı seçecek bir prompt hazırla." :
+        "METHOD: Tree of Thoughts. Prepare a prompt that tackles the problem from multiple angles, develops various solution paths (branches), and selects the most logical one.";
+    } else if (command === '/first') {
+      taskInstruction = isTr ?
+        "YÖNTEM: First Principles (İlk İlkeler). Mevcut varsayımları reddeden, konuyu en temel fiziksel veya mantıksal gerçeklerine indirgeyip oradan inşa eden bir prompt oluştur." :
+        "METHOD: First Principles. Create a prompt that rejects assumptions, breaks the topic down to its fundamental truths, and builds back up from there.";
+    } else if (command === '/expert') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Expert Perspective. Konuyu o alanın dünyaca ünlü bir otoritesi gözüyle, derin teknik terimler ve vaka analizleriyle ele alacak bir prompt hazırla." :
+        "METHOD: Expert Perspective. Prepare a prompt to handle the topic as a world-renowned authority in that field, using deep technical terms and case studies.";
+    } else if (command === '/table') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Tabular Analysis. Bilgileri karşılaştırmalı tablolar, kategorize edilmiş sütunlar ve yapılandırılmış veri formatında sunacak bir prompt oluştur." :
+        "METHOD: Tabular Analysis. Create a prompt to present information in comparative tables, categorized columns, and structured data formats.";
+    } else if (command === '/critic') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Self-Criticism/Iterative. Yapay zekanın önce bir cevap üretmesini, sonra onu en sert şekilde eleştirmesini ve en sonunda mükemmel hali sunmasını sağlayan bir prompt yaz." :
+        "METHOD: Self-Criticism/Iterative. Write a prompt that forces the AI to produce an initial answer, criticize it harshly, and then provide a perfected final version.";
+    } else if (command === '/code') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Code Logic. Konuyu bir algoritma, akış şeması veya psödo-kod mantığıyla, mantıksal kapılar kullanarak açıklayacak bir prompt oluştur." :
+        "METHOD: Code Logic. Create a prompt to explain the topic using an algorithm, flowchart, or pseudo-code logic with logical gates.";
+    } else if (command === '/few') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Few-Shot Prompting. Kullanıcının isteğini, yapay zekaya 2-3 adet somut örnek (Girdi -> Çıktı) vererek formatı öğreten bir prompta dönüştür." :
+        "METHOD: Few-Shot Prompting. Transform the request into a prompt that provides 2-3 concrete examples (Input -> Output) to teach the AI the desired format.";
+    } else if (command === '/debate') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Debate Mode. Konuyu hem savunan hem de eleştiren iki farklı uzman görüşü oluşturacak ve sonunda sentez yapacak bir prompt hazırla." :
+        "METHOD: Debate Mode. Prepare a prompt that creates two different expert opinions (pro and con) and synthesizes them at the end.";
+    } else if (command === '/analog') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Analogy Engine. Soyut ve zor kavramları, herkesin bildiği somut günlük hayat örnekleri ve analojilerle açıklayacak bir prompt oluştur." :
+        "METHOD: Analogy Engine. Create a prompt to explain abstract and difficult concepts using concrete everyday analogies that everyone understands.";
+    } else if (command === '/negative') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Negative Constraints. Yapılacaklardan ziyade kesinlikle *yapılmaması* gerekenleri (yasaklı kelimeler, tarzlar, konular) listeleyen bir prompt yaz." :
+        "METHOD: Negative Constraints. Write a prompt that lists what should *definitely not* be done (forbidden words, styles, topics) rather than what should be done.";
+    } else if (command === '/creative') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Creative Narrative. Bilgiyi sıkıcı bir metin yerine, sürükleyici bir hikaye, senaryo veya kurgusal bir diyalog içinde sunacak bir prompt hazırla." :
+        "METHOD: Creative Narrative. Prepare a prompt to present information in an engaging story, script, or fictional dialogue instead of boring text.";
+    } else if (command === '/risks') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Risk & Mitigation. Konunun potansiyel zayıf noktalarını, risklerini ve bu riskleri nasıl minimize edeceğini anlatan bir prompt oluştur." :
+        "METHOD: Risk & Mitigation. Create a prompt that explains the potential weaknesses and risks of the topic and how to minimize them.";
+    } else if (command === '/future') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Future Foresight. Konunun 5, 10 ve 20 yıl sonraki halini trendlere ve verilere dayanarak tahmin eden spekülatif bir prompt yaz." :
+        "METHOD: Future Foresight. Write a speculative prompt that predicts the state of the topic in 5, 10, and 20 years based on trends and data.";
+    } else if (command === '/summary') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Executive Summary. Uzun konuları sadece karar vericilerin bilmesi gereken en kritik noktalarla özetleyen (Bullet points) bir prompt hazırla." :
+        "METHOD: Executive Summary. Prepare a prompt that summarizes long topics into the most critical points (bullet points) that decision-makers need to know.";
+    } else if (command === '/interact') {
+      taskInstruction = isTr ?
+        "YÖNTEM: Interactive Discovery. Yapay zekanın yanıt vermeden önce, kullanıcıya konuyu daha iyi anlamak için 3 adet derinlemesine soru sormasını sağlayan bir prompt oluştur." :
+        "METHOD: Interactive Discovery. Create a prompt where the AI asks the user 3 in-depth questions to better understand the topic before providing a final answer.";
+    } else {
+      taskInstruction = isTr ?
+        "GÖREV: Kullanıcının ham metnini dünya standartlarında, etkili ve yapılandırılmış bir yapay zeka promptuna dönüştür." :
+        "TASK: Transform the user's raw input into a world-class, effective, and structured AI prompt.";
+    }
+
+    const systemPrompt = `You are a ${roleName}. ${taskInstruction}
 
 ${contextStr}
 
@@ -439,27 +693,17 @@ Rewrite the provided text into a highly effective, professional, and structured 
 
 ### INSTRUCTIONS:
 1. **Analyze:** Think about the user's intent, the required domain expertise, and the best persona.
-2. **Refine:** Use the CO-STAR (Context, Objective, Style, Tone, Audience, Response) framework.
+2. **Refine:** Use professional frameworks (like CO-STAR).
 3. **Format:** Output ONLY the final prompt inside <FINAL_PROMPT> tags.
-
-### EXAMPLE:
-Input: "Write a blog about AI"
-Output: 
-<ANALYSIS>
-Intent: Blog writing about AI. Persona: Tech Journalist.
-</ANALYSIS>
-<FINAL_PROMPT>
-Act as an expert Tech Journalist. Write a 1000-word engaging blog post about the impact of Generative AI in 2025. Target audience: Business leaders. Tone: Professional yet accessible. Include a table of key trends.
-</FINAL_PROMPT>
 
 ### CRITICAL RULES:
 - ${langRule}
 - RETURN the final result inside <FINAL_PROMPT> tags.
 - NO commentary outside the tags.
-- If the conversation context is provided, ensure the refined prompt is consistent with it.
+- Ensure the result is a prompt *to be given to an AI*, not the final answer itself.
 
 ### USER INPUT TO ENHANCE:
-"${text}"`;
+"${userText}"`;
 
     const instruction = systemPrompt;
 
@@ -512,7 +756,7 @@ window.addEventListener('cgptopt-optimize', async (event) => {
     return;
   }
   const optimized = await optimizePrompt(text);
-  window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-optimize-result', payload: { optimized, requestId } }, '*');
+  window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-optimize-result', payload: { optimized, requestId, error: !optimized ? "Optimization failed" : null } }, '*');
 });
 
 window.addEventListener('cgptopt-request-status', () => {

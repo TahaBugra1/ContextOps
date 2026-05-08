@@ -8,44 +8,62 @@
 </head>
 <body>
   <main class="wrap" id="popupRoot">
-    <div class="head">
-      <img class="logo" src="optimize.png" alt="ChatGPT Optimizer">
-      <div class="title-block">
-        <div class="title" data-i18n="extensionName"></div>
-        <div class="creator" data-i18n="creatorLine"></div>
+    <!-- Header Section -->
+    <header class="header">
+      <div class="brand">
+        <img class="logo" src="optimize.png" alt="Logo">
+        <div class="brand-text">
+          <h1 data-i18n="extensionName">ChatGPT Optimizer</h1>
+          <span class="version">v2.5.0</span>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <label class="row switch-row">
-      <span data-i18n="enabledLabel"></span>
-      <input id="enabled" type="checkbox">
-    </label>
+    <!-- Main Settings -->
+    <section class="section">
+      <label class="row-item">
+        <span class="label-text" data-i18n="enabledLabel"></span>
+        <div class="switch">
+          <input id="enabled" type="checkbox">
+          <span class="slider"></span>
+        </div>
+      </label>
 
-    <label class="row">
-      <span data-i18n="limitLabel"></span>
-      <input id="limit" type="number" min="1" max="200" step="1">
-    </label>
+      <label class="row-item">
+        <span class="label-text" data-i18n="limitLabel"></span>
+        <input id="limit" class="input-number" type="number" min="1" max="200">
+      </label>
+    </section>
 
-    <div class="row actions">
-      <button id="loadOlder" type="button" data-i18n="loadOlder"></button>
-      <button id="trimNow" type="button" data-i18n="trimNow"></button>
-      <button id="openOptions" type="button" data-i18n="openSettings"></button>
-    </div>
-
-    <div class="groq-box">
-      <div class="groq-title">
-        <span class="lightning">⚡</span> <span data-i18n="groqBoostTitle"></span>
+    <!-- Turbo/Groq Section -->
+    <section class="turbo-card">
+      <div class="turbo-header">
+        <span class="icon">⚡</span>
+        <span class="title" data-i18n="groqBoostTitle">Groq AI Optimizer</span>
       </div>
-      <div class="groq-desc" data-i18n="groqBoostDesc"></div>
-      <button id="connectGroq" class="btn-groq" data-i18n="groqBoostBtn"></button>
-      <div id="groqStatus" class="groq-status hidden" data-i18n="groqBoostActive"></div>
-      <div id="groqKeyDisplay" class="groq-key hidden"></div>
-    </div>
+      
+      <div id="groqStatusActive" class="status-badge active hidden">
+        <span class="dot"></span> <span data-i18n="groqBoostActive">Active</span>
+      </div>
+      
+      <div id="groqStatusWarning" class="status-badge warning hidden">
+        <span data-i18n="groqNoKeyWarning">API Key Missing</span>
+      </div>
 
-    <div id="scopeNote" class="scope-note" data-i18n="onlyChatgptScope"></div>
-    <div id="status" class="status"></div>
-    <div id="pinnedCount" class="status pinned-status"></div>
-    <div id="debug" class="status"></div>
+      <button id="openOptionsFromPopup" class="btn-primary full" data-i18n="setupGroqKey"></button>
+    </section>
+
+    <!-- Quick Actions -->
+    <footer class="footer">
+      <div class="button-grid">
+        <button id="loadOlder" class="btn-outline" data-i18n="loadOlder"></button>
+        <button id="trimNow" class="btn-outline" data-i18n="trimNow"></button>
+        <button id="openOptions" class="btn-outline wide" data-i18n="openSettings"></button>
+      </div>
+      <p class="note" data-i18n="onlyChatgptScope"></p>
+    </footer>
+
+    <div id="status" class="toast-status"></div>
   </main>
 
   <div id="blockedBanner" class="blocked hidden">

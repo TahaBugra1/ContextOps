@@ -13,7 +13,9 @@
     autoTrim: true,
     showToolbar: false,
     optimizerEnabled: true,
-    optimizerLanguage: 'en'
+    optimizerLanguage: 'en',
+    groq_key: '',
+    selectedStyles: ['/spec', '/cot', '/feynman', '/socratic', '/step']
   };
 
   const CONFIG_KEY = 'cgpt_optimizer_config_v1';
@@ -67,6 +69,8 @@
       showToolbar: typeof raw.showToolbar === 'boolean' ? raw.showToolbar : DEFAULTS.showToolbar,
       optimizerEnabled: typeof raw.optimizerEnabled === 'boolean' ? raw.optimizerEnabled : DEFAULTS.optimizerEnabled,
       optimizerLanguage: (raw.optimizerLanguage === 'en' || raw.optimizerLanguage === 'tr') ? raw.optimizerLanguage : DEFAULTS.optimizerLanguage,
+      groq_key: typeof raw.groq_key === 'string' ? raw.groq_key : (settings.groq_key || DEFAULTS.groq_key),
+      selectedStyles: Array.isArray(raw.selectedStyles) ? raw.selectedStyles : DEFAULTS.selectedStyles,
       starredIds: Array.isArray(raw.starredIds) ? raw.starredIds : (Array.isArray(starredIds) ? starredIds : [])
     };
   }
@@ -86,29 +90,12 @@
     }, 2400);
   }
 
-  function toggleMagicOverlay(active) {
-    let overlay = document.querySelector('.cgptopt-magic-overlay');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.className = 'cgptopt-magic-overlay';
-      overlay.innerHTML = `
-        <div class="cgptopt-magic-spinner">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-            <path d="M7.5 5.6L10 7L8.6 4.5L10 2L7.5 3.4L5 2L6.4 4.5L5 7L7.5 5.6M19.5 15.4L17 14L18.4 16.5L17 19L19.5 17.6L22 19L20.6 16.5L22 14L19.5 15.4M22 2L19.5 3.4L17 2L18.4 4.5L17 7L19.5 5.6L22 7L20.6 4.5L22 2"/>
-          </svg>
-        </div>
-        <div class="cgptopt-magic-text">Sihirli Değnek Hazırlanıyor...</div>
-      `;
-      // Append to body instead of main to avoid layout issues, but keep it positioned
-      document.body.appendChild(overlay);
-    }
-    overlay.classList.toggle('active', active);
-    
-    // Add a subtle blur/dim to the textarea area instead of blocking the whole screen
+  function toggleTextareaLock(active) {
     const textarea = document.getElementById('prompt-textarea');
     if (textarea) {
-      textarea.style.opacity = active ? "0.5" : "1";
+      textarea.style.opacity = active ? "0.4" : "1";
       textarea.style.pointerEvents = active ? "none" : "auto";
+      textarea.style.cursor = active ? "wait" : "auto";
     }
   }
 
@@ -220,7 +207,7 @@
 
   function injectPromptOptimizer() {
     if (!settings.enabled || !settings.optimizerEnabled) {
-      const existing = document.querySelector('.cgptopt-optimize-btn');
+      const existing = document.querySelector('.cgptopt-optimizer-wrapper');
       if (existing) existing.remove();
       return;
     }
@@ -228,23 +215,131 @@
     const textarea = document.getElementById('prompt-textarea');
     if (!textarea) return;
 
-    // In new ChatGPT, textarea is a contenteditable div.
-    // We attach our button to its parent or a stable sibling.
-    const container = textarea.closest('.flex.w-full.items-center') || textarea.parentElement;
-    if (!container || container.querySelector('.cgptopt-optimize-btn')) return;
+    if (document.querySelector('.cgptopt-optimizer-wrapper')) return;
 
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cgptopt-optimizer-wrapper';
+    document.body.appendChild(wrapper);
+
+    function updateWrapperPosition() {
+      const textarea = document.getElementById('prompt-textarea');
+      if (!textarea || !wrapper) return;
+      
+      const rect = textarea.getBoundingClientRect();
+      // Position at bottom-right of textarea, with some padding
+      wrapper.style.top = `${rect.bottom - 40}px`;
+      wrapper.style.left = `${rect.right - 70}px`;
+      
+      // Sync visibility
+      const isVisible = !!textarea.offsetParent;
+      wrapper.style.display = isVisible ? 'flex' : 'none';
+    }
+
+    // Update position frequently for responsiveness
+    const posInterval = setInterval(updateWrapperPosition, 100);
+    window.addEventListener('resize', updateWrapperPosition);
+
+    // Optimize Button
     const btn = document.createElement('button');
     btn.className = 'cgptopt-optimize-btn';
-    btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7.5 5.6L10 7L8.6 4.5L10 2L7.5 3.4L5 2L6.4 4.5L5 7L7.5 5.6M19.5 15.4L17 14L18.4 16.5L17 19L19.5 17.6L22 19L20.6 16.5L22 14L19.5 15.4M22 2L19.5 3.4L17 2L18.4 4.5L17 7L19.5 5.6L22 7L20.6 4.5L22 2M14.08 15.59L16.68 12.99L11.01 7.32L8.41 9.92L14.08 15.59M16.14 4.41C16.14 4.41 15.14 3.41 14.14 4.41L12.14 6.41L17.59 11.86L19.59 9.86C20.59 8.86 19.59 7.86 19.59 7.86L16.14 4.41Z"/></svg>`;
+    btn.type = 'button';
     btn.title = t('improvePrompt') || "Sihirli Değnek: Promptu Geliştir";
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+      </svg>
+    `;
+
+    // Menu Trigger
+    const trigger = document.createElement('button');
+    trigger.className = 'cgptopt-menu-trigger';
+    trigger.type = 'button';
+    trigger.innerHTML = `
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+    `;
+
+    // Commands Menu
+    const menu = document.createElement('div');
+    menu.className = 'cgptopt-commands-menu';
     
-    // Inject near the end of the container
-    container.style.position = 'relative'; 
-    container.appendChild(btn);
+    const PROMPT_STYLES = {
+      '/spec': { icon: '📐', tr: 'SPEC Yöntemi', en: 'SPEC Method' },
+      '/cot': { icon: '🧠', tr: 'Chain of Thought', en: 'Chain of Thought' },
+      '/feynman': { icon: '👶', tr: 'Feynman Tekniği', en: 'Feynman Technique' },
+      '/socratic': { icon: '🏛️', tr: 'Sokratik Yöntem', en: 'Socratic Method' },
+      '/step': { icon: '🪜', tr: 'Adım Adım', en: 'Step-by-Step' },
+      '/tot': { icon: '🌳', tr: 'Tree of Thoughts', en: 'Tree of Thoughts' },
+      '/first': { icon: '🧱', tr: 'İlk İlkeler', en: 'First Principles' },
+      '/few': { icon: '💡', tr: 'Few-Shot', en: 'Few-Shot' },
+      '/expert': { icon: '🎓', tr: 'Uzman Görüşü', en: 'Expert Perspective' },
+      '/debate': { icon: '⚖️', tr: 'Münazara Modu', en: 'Debate Mode' },
+      '/table': { icon: '📊', tr: 'Tablo Formatı', en: 'Tabular Output' },
+      '/critic': { icon: '🧐', tr: 'Eleştirel Analiz', en: 'Critical Analysis' },
+      '/analog': { icon: '🔗', tr: 'Analoji Kurma', en: 'Analogy Making' },
+      '/code': { icon: '💻', tr: 'Kod Mantığı', en: 'Code Logic' },
+      '/negative': { icon: '🚫', tr: 'Negatif Sınır', en: 'Negative Constraints' },
+      '/creative': { icon: '🎭', tr: 'Yaratıcı Hikaye', en: 'Creative Story' },
+      '/risks': { icon: '⚠️', tr: 'Risk Analizi', en: 'Risk Analysis' },
+      '/future': { icon: '🔮', tr: 'Gelecek Öngörüsü', en: 'Future Foresight' },
+      '/summary': { icon: '📉', tr: 'Yönetici Özeti', en: 'Executive Summary' },
+      '/interact': { icon: '💬', tr: 'Etkileşimli', en: 'Interactive Mode' }
+    };
+
+    const standardCommands = [
+      { id: '/image', icon: '🎨', tr: 'Görsel Üret', en: 'Create Image' },
+      { id: '/makale', icon: '📝', tr: 'Makale Yaz', en: 'Write Article' },
+      { id: '/mail', icon: '📧', tr: 'E-posta Yaz', en: 'Write Email' }
+    ];
+
+    const dynamicCommands = (settings.selectedStyles || []).map(id => {
+      const style = PROMPT_STYLES[id];
+      if (!style) return null;
+      return { id, icon: style.icon, tr: style.tr, en: style.en };
+    }).filter(Boolean);
+
+    const allCommands = [...standardCommands, ...dynamicCommands];
+
+    allCommands.forEach(cmd => {
+      const item = document.createElement('div');
+      item.className = 'cgptopt-menu-item';
+      item.innerHTML = `<span>${cmd.icon}</span> ${settings.optimizerLanguage === 'tr' ? cmd.tr : cmd.en}`;
+      item.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const currentVal = textarea.innerText || textarea.value || "";
+        const newVal = cmd.id + " " + currentVal.replace(/^\/[a-z]+ /i, '').trim();
+        
+        if (textarea.tagName === 'DIV') {
+          textarea.innerText = newVal;
+        } else {
+          textarea.value = newVal;
+        }
+        
+        textarea.focus();
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        menu.classList.remove('show');
+      };
+      menu.appendChild(item);
+    });
+
+    trigger.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      menu.classList.toggle('show');
+    };
+
+    document.addEventListener('click', () => {
+      menu.classList.remove('show');
+    });
 
     btn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
+      if (btn.classList.contains('loading')) return;
+      
       const text = textarea.innerText || textarea.value || "";
       if (!text.trim()) return;
 
@@ -252,6 +347,13 @@
       const requestId = Math.random().toString(36).substring(7);
       window.dispatchEvent(new CustomEvent('cgptopt-optimize', { detail: { text, requestId } }));
     };
+
+    wrapper.appendChild(menu);
+    wrapper.appendChild(btn);
+    wrapper.appendChild(trigger);
+    
+    container.style.position = 'relative';
+    container.appendChild(wrapper);
   }
 
   window.addEventListener('message', (event) => {
@@ -259,11 +361,11 @@
     
     if (event.data.type === 'cgptopt-status') {
       lastStatus = { ...lastStatus, ...event.data.payload };
+    } else if (event.data.type === 'cgptopt-status-toast') {
+      showToast(event.data.payload.message);
     } else if (event.data.type === 'cgptopt-ui-lock') {
       const { active } = event.data.payload || {};
-      toggleMagicOverlay(active);
-    } else if (event.data.type === 'cgptopt-warmup-worker') {
-      chrome.runtime.sendMessage({ type: 'WARMUP_WORKER' });
+      toggleTextareaLock(active);
     } else if (event.data.type === 'cgptopt-reset-worker') {
       chrome.runtime.sendMessage({ type: 'RESET_WORKER' });
     } else if (event.data.type === 'cgptopt-optimize-request') {
@@ -282,7 +384,7 @@
           payload: { 
             success: response?.success, 
             optimized: response?.optimized, 
-            error: response?.error,
+            error: response?.error || (!response?.success ? "Optimization failed" : null),
             requestId 
           } 
         }, '*');
@@ -293,10 +395,15 @@
       const btn = document.querySelector('.cgptopt-optimize-btn'); 
       
       if (btn) btn.classList.remove('loading');
-      toggleMagicOverlay(false);
+      toggleTextareaLock(false);
       
       if (error === 'no_token') {
         showToast("Lütfen önce bir mesaj gönderin.");
+        return;
+      }
+      
+      if (error && error !== 'no_token') {
+        showToast(settings.optimizerLanguage === 'tr' ? "Hata: Prompt optimize edilemedi." : "Error: Could not optimize prompt.");
         return;
       }
 
@@ -324,10 +431,10 @@
     }
     
     await storageArea().set({ [STARRED_KEY]: starredIds });
-    dispatchConfig();
-  }
+}
 
   function setupObserver() {
+    // --- Original ChatGPT Logic ---
     const observer = new MutationObserver(() => {
       if (!isContextValid()) {
         observer.disconnect();

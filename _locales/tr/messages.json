@@ -121,18 +121,36 @@
     "message": "Sihirli Değnek: Promptu Geliştir"
   },
   "groqBoostTitle": {
-    "message": "Yıldırım Hızı (Groq Boost)"
+    "message": "Ultra Hız (Turbo Boost)"
   },
   "groqBoostDesc": {
-    "message": "Groq ile optimizasyonu 10x hızlandırın (Sadece 1 kez izin gerekir)."
+    "message": "Sunucu taraflı hızlandırma ile 10x daha hızlı sonuç alın."
   },
   "groqBoostBtn": {
-    "message": "Hemen Hızlandır"
+    "message": "Turbo'yu Aktif Et"
   },
   "groqBoostActive": {
-    "message": "⚡ Yıldırım Hızı Aktif!"
+    "message": "⚡ Turbo Boost Aktif!"
   },
   "groqWait": {
     "message": "Hızlandırılıyor, lütfen bekleyin..."
+  },
+  "groqNoKeyWarning": {
+    "message": "Lütfen ayarlardan Groq API Key yükleyin!"
+  },
+  "setupGroqKey": {
+    "message": "API Key Kurulumu"
+  },
+  "changeGroqKey": {
+    "message": "API Key Değiştir"
+  },
+  "groqSettingsTitle": {
+    "message": "Groq API Ayarları"
+  },
+  "groqKeyLabel": {
+    "message": "API Anahtarı (Key)"
+  },
+  "groqKeyNote": {
+    "message": "Anahtarınızı console.groq.com/keys adresinden alabilirsiniz."
   }
 }

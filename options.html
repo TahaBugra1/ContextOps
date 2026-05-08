@@ -42,6 +42,22 @@
       </select>
     </label>
 
+    <div class="row-group">
+      <h2 data-i18n="groqSettingsTitle"></h2>
+      <label class="row">
+        <span data-i18n="groqKeyLabel"></span>
+        <input id="groqKey" type="password" placeholder="gsk_...">
+      </label>
+      <div class="note" data-i18n="groqKeyNote"></div>
+    </div>
+
+    <div class="row-group">
+      <h2 data-i18n="promptStylesTitle">Prompt Yöntemleri (Maks 5)</h2>
+      <div id="styles-grid" class="styles-grid">
+        <!-- JS will populate here -->
+      </div>
+    </div>
+
     <div class="actions">
       <button id="save" type="button" data-i18n="apply"></button>
       <button id="reset" type="button" data-i18n="resetDefaults"></button>

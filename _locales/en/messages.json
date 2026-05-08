@@ -134,5 +134,23 @@
   },
   "groqWait": {
     "message": "Boosting, please wait..."
+  },
+  "groqNoKeyWarning": {
+    "message": "Please load a Groq API Key in settings!"
+  },
+  "setupGroqKey": {
+    "message": "Setup API Key"
+  },
+  "changeGroqKey": {
+    "message": "Change API Key"
+  },
+  "groqSettingsTitle": {
+    "message": "Groq API Settings"
+  },
+  "groqKeyLabel": {
+    "message": "API Key"
+  },
+  "groqKeyNote": {
+    "message": "You can get your key at console.groq.com/keys"
   }
 }
