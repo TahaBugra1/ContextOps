@@ -341,19 +341,25 @@
 function normalizeText(text) {
   if (!text) return '';
   return text.toString().toLowerCase()
-    .replace(/[\s\n\r]+/g, ' ')
-    .replace(/[^\w\sğüşıöç]/g, '')
+    .replace(/[\s\n\r\t]+/g, ' ') // Handle all whitespace
+    .replace(/[^\w\sğüşıöçĞÜŞİÖÇ]/g, '') // Include all Turkish characters
     .trim();
 }
 
 function tagMessages() {
   if (!currentMapping) return;
-  const articles = document.querySelectorAll('article, [data-testid^="conversation-turn-"]');
+  // UPDATED: Added more message container selectors
+  const articles = document.querySelectorAll('article, [data-testid^="conversation-turn-"], div[class*="ChatMessage"], div[class*="message_wrapper"]');
 
   articles.forEach(article => {
     if (article.hasAttribute('data-cgptopt-id')) return;
 
-    const textNode = article.querySelector('.markdown') || article.querySelector('.flex-col.gap-1.md\\:gap-3') || article;
+    // UPDATED: More targeted text extraction
+    const textNode = article.querySelector('.markdown') || 
+                     article.querySelector('[data-message-author-role]') ||
+                     article.querySelector('.flex-col.gap-1.md\\:gap-3') || 
+                     article;
+                     
     const domText = normalizeText(textNode.textContent);
     if (domText.length < 5) return;
 
@@ -368,6 +374,10 @@ function tagMessages() {
 
     if (match) {
       article.setAttribute('data-cgptopt-id', match[0]);
+      // Also try to set standard attributes if they are missing
+      if (!article.hasAttribute('data-message-id')) {
+        article.setAttribute('data-message-id', match[0]);
+      }
       console.log(`[CGPTOpt] Tagged message ${match[0]}`);
     }
   });

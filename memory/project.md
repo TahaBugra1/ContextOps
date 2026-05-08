@@ -1,43 +1,43 @@
-# ChatGPT Optimizer - Project Memory
+﻿# ChatGPT Optimizer - Proje Hafzas
 
-## Proje Amacı
-ChatGPT web arayüzünde (chatgpt.com ve chat.openai.com) uzun sohbetlerde oluşan performans sorunlarını ve yavaşlamaları (UI lag) gidermek için konuşma geçmişini render öncesi optimize eden bir Chrome eklentisidir.
+## Proje Amac
+ChatGPT zerindeki uzun sohbetlerde yaanan donmalar engellemek iin eski mesajlar dinamik olarak gizleyen ve Groq API destei ile ham metinleri profesyonel "Prompt Mhendislii" teknikleriyle (20 farkl yntem) optimize eden ileri seviye bir tarayc eklentisi.
 
-## Teknoloji Yığını
-- **Core:** JavaScript (ES6+), HTML, CSS
-- **Manifest:** Manifest V3 (MV3)
-- **APIs:** Chrome Extension Storage, Tabs APIs
-- **Localization:** Chrome i18n sistemi (_locales)
+## Teknoloji Yn
+- **ekirdek:** JavaScript (Manifest V3)
+- **AI Engine:** Groq API (Model: llama-3.3-70b-versatile)
+- **Stil:** Vanilla CSS (Glassmorphism, Modern Dark Theme, Flex/Grid Layout)
+- **Depolama:** chrome.storage.sync (Kullanc ayarlar ve API anahtar)
 
-## Klasör Yapısı
-- `_locales/`: Yerelleştirme dosyaları (TR, EN)
-- `background.js`: Arka plan servis çalışanı (service worker)
-- `content.js`: Sayfa bağlamında çalışan içerik betiği (isolated world)
-- `mainWorld.js`: Sayfanın ana dünyasına enjekte edilen betik (DOM manipülasyonu)
-- `manifest.json`: Eklenti yapılandırması
-- `popup.html/js/css`: Eklenti açılır pencere arayüzü
-- `options.html/js/css`: Eklenti ayarlar sayfası
-- `ui.css`: Arayüz stilleri
-- `memory/`: Proje bellek sistemi
+## Ana zellikler & Modller
 
-## Kritik Dosyalar
-- `manifest.json`: Eklentinin kalbi, izinler ve dosya eşleşmeleri burada tanımlanır.
-- `mainWorld.js`: ChatGPT'nin render sürecine müdahale eden ve Prompt Optimizasyonu sağlayan kritik mantığı içerir.
-- `content.js`: Sayfa ile eklenti arasındaki iletişimi ve arayüz enjeksiyonunu sağlar.
-- `background.js`: Arka plan görevlerini yönetir.
+### 1. Prompt Mhendislii stasyonu
+Eklenti, ham kullanc girdisini 20 farkl akademik ve teknik ynteme gre optimize edebilir:
+- **Temel Komutlar:** /image (Grsel), /makale (SEO Makale), /mail (Kurumsal E-posta).
+- **Akademik Yntemler:** SPEC, Chain of Thought (CoT), Feynman, Sokratik Yntem, Tree of Thoughts (ToT), lk lkeler, Mnazara Modu vb.
+- **Kiiselletirme:** Kullanc, Ayarlar sayfasndaki zgara arayz zerinden favori 5 yntemini seerek ana menye sabitleyebilir.
 
-## Yeni Özellikler (2026-04-24)
-- **Prompt Optimizer (Zekâ & Hız):**
-  - **Bağlam Farkındalığı:** Artık konuşmanın son 5 mesajını analiz ederek bağlama uygun optimizasyon yapar.
-  - **Persistent Worker Tab:** Her seferinde pencere açıp kapatmak yerine arka planda açık kalan bir "işçi sekme" kullanarak hızı %300 artırır.
-  - **Non-Blocking UI:** Optimizasyon sırasında kullanıcıyı engellemeyen, sadece ilgili alanı karartan şeffaf bir gösterge eklendi.
-- **Hata Yönetimi:** Otomasyon hataları için otomatik yeniden deneme ve 5 dakikalık hareketsizlik sonrası temizlik mantığı eklendi.
+### 2. Dinamik UI Enjeksiyonu
+- **Fixed-Position Layer:** Men artk ChatGPT'nin metin kutusu iine deil, document.body zerine enjekte edilir.
+- **Smart Tracking:** Metin kutusunun konumu (getBoundingClientRect) milisaniyelik hassasiyetle takip edilerek men her zaman doru yerde (sa alt kede) konumlandrlr.
+- **Global Override:** z-index: 2147483647 ile dier tm elementlerin zerinde kalmas garanti edilir.
 
-## Gelişmiş Özellikler (2026-04-25)
-- **Lifecycle Management (Worker Tab):**
-  - **Warmup:** ChatGPT ilk açıldığında arka plan sekmeyi otomatik hazırlar (Gecikme süresi 0'a iner).
-  - **Auto-Reset:** Ana sohbet değiştiğinde (URL/ID bazlı) arka plan sekme hafızasını sıfırlar (Bağlam kirliliğini önler).
-- **Advanced Prompt Optimizer Skills:**
-  - **Chain of Thought (CoT):** Model artık yanıt vermeden önce analiz yapar, uzmanlık alanı belirler.
-  - **Few-Shot Learning:** Sistem komutuna eklenen örnekler sayesinde çok daha kaliteli çıktılar üretir.
-  - **XML Isolation:** `<FINAL_PROMPT>` etiketleri ile sadece temiz çıktının alınması garanti edilir.
+### 3. Hafza Ynetimi (Memory Guard)
+- Belirlenmi limit (Varsaylan: 5-200 aras) aldnda eski mesajlar DOM zerinden kaldrarak tarayc performansn korur.
+
+## Klasr Yaps
+- memory/: Proje hafzas (project.md) ve gnlkler (ctivity_log_YYYY-MM-DD.md).
+- mainWorld.js: Prompt optimizasyon mant, 20 yntemin sistem talimatlar.
+- content.js: UI enjeksiyonu, konum takibi ve mesajlama kprs.
+- ackground.js: Groq API isteklerini gvenli bir ekilde yneten arka plan scripti.
+- options.html/js/css: 20 yntem arasndan 5 seimlik grid arayz ve API anahtar ynetimi.
+- popup.html/js/css: Modern glassmorphic eklenti kontrol paneli.
+- ui.css: ChatGPT sayfasna enjekte edilen tm grsel bileenlerin stilleri.
+
+## Kritik Teknik Bilgiler
+- **API Gvenlii:** API anahtar sadece yerel cihazda saklanr ve dorudan Groq sunucularna gnderilir.
+- **Model:** Modeller decommissioned olduka ackground.js iinden gncellenmelidir (Mevcut: llama-3.3-70b-versatile).
+- **Dil Destei:** TR ve EN tam uyumlu sistem talimatlar.
+
+---
+*Son Gncelleme: 2026-05-08 (V2.5.0)*

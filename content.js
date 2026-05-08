@@ -143,16 +143,15 @@
     const messages = document.querySelectorAll('article, [data-testid^="conversation-turn-"]');
     const currentStarred = getStarredIdsForCurrentConversation();
     
-    if (messages.length > 0) {
-      console.log(`[CGPTOpt] Found ${messages.length} messages. Injecting buttons...`);
-    }
-
     messages.forEach((msg) => {
       // Find a suitable place for the button (look for standard toolbars or actions area)
-      const toolbar = msg.querySelector('.flex.justify-between') || 
+      // UPDATED: Added more specific selectors for the new ChatGPT UI (GPT-4o)
+      const toolbar = msg.querySelector('.flex.justify-between.gap-2') || 
+                      msg.querySelector('.flex.items-center.gap-1') ||
+                      msg.querySelector('.flex.justify-between') || 
                       msg.querySelector('.empty\\:hidden') ||
                       msg.querySelector('div[class*="toolbar"]') ||
-                      msg.querySelector('.justify-start.flex'); // Fallback for some versions
+                      msg.querySelector('.justify-start.flex'); 
       
       if (!toolbar) return;
 
@@ -162,13 +161,20 @@
       const msgId = msg.getAttribute('data-message-id') || 
                     msg.getAttribute('data-turn-id') ||
                     msg.querySelector('[data-message-id]')?.getAttribute('data-message-id') ||
+                    msg.querySelector('[data-turn-id]')?.getAttribute('data-turn-id') ||
                     msg.getAttribute('data-cgptopt-id');
 
       if (!btn) {
         btn = document.createElement('button');
         btn.className = 'cgptopt-star-btn';
         btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
-        toolbar.appendChild(btn);
+        
+        // Inject before the first child of toolbar for better positioning
+        if (toolbar.firstChild) {
+          toolbar.insertBefore(btn, toolbar.firstChild);
+        } else {
+          toolbar.appendChild(btn);
+        }
         
         btn.onclick = async (e) => {
           e.preventDefault();
@@ -177,6 +183,7 @@
           const currentId = msg.getAttribute('data-message-id') || 
                             msg.getAttribute('data-turn-id') ||
                             msg.querySelector('[data-message-id]')?.getAttribute('data-message-id') ||
+                            msg.querySelector('[data-turn-id]')?.getAttribute('data-turn-id') ||
                             msg.getAttribute('data-cgptopt-id');
 
           if (!currentId) {
@@ -197,6 +204,7 @@
         btn.title = t(isStarred ? 'unstar' : 'star');
         btn.style.opacity = "1";
         btn.style.cursor = "pointer";
+        btn.style.display = "inline-flex"; // Ensure it's visible
       } else {
         btn.title = "ID matching...";
         btn.style.opacity = "0.3";
