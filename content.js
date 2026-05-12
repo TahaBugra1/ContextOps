@@ -145,8 +145,9 @@
     
     messages.forEach((msg) => {
       // Find a suitable place for the button (look for standard toolbars or actions area)
-      // UPDATED: Added more specific selectors for the new ChatGPT UI (GPT-4o)
-      const toolbar = msg.querySelector('.flex.justify-between.gap-2') || 
+      // UPDATED: Added [data-testid$="-actions"] which is common in newer ChatGPT versions
+      const toolbar = msg.querySelector('[data-testid$="-actions"]') ||
+                      msg.querySelector('.flex.justify-between.gap-2') || 
                       msg.querySelector('.flex.items-center.gap-1') ||
                       msg.querySelector('.flex.justify-between') || 
                       msg.querySelector('.empty\\:hidden') ||
@@ -162,7 +163,8 @@
                     msg.getAttribute('data-turn-id') ||
                     msg.querySelector('[data-message-id]')?.getAttribute('data-message-id') ||
                     msg.querySelector('[data-turn-id]')?.getAttribute('data-turn-id') ||
-                    msg.getAttribute('data-cgptopt-id');
+                    msg.getAttribute('data-cgptopt-id') ||
+                    msg.querySelector('[data-testid^="conversation-turn-"]')?.getAttribute('data-testid')?.split('-').pop();
 
       if (!btn) {
         btn = document.createElement('button');
@@ -213,9 +215,9 @@
     });
   }
 
-  function injectPromptOptimizer() {
+  function injectSphereMenu() {
     if (!settings.enabled || !settings.optimizerEnabled) {
-      const existing = document.querySelector('.cgptopt-optimizer-wrapper');
+      const existing = document.querySelector('.cgptopt-sphere-wrapper');
       if (existing) existing.remove();
       return;
     }
@@ -223,145 +225,178 @@
     const textarea = document.getElementById('prompt-textarea');
     if (!textarea) return;
 
-    if (document.querySelector('.cgptopt-optimizer-wrapper')) return;
+    if (document.querySelector('.cgptopt-sphere-wrapper')) return;
 
+    // --- Root wrapper: fixed positioned, outside textarea to the right ---
     const wrapper = document.createElement('div');
-    wrapper.className = 'cgptopt-optimizer-wrapper';
+    wrapper.className = 'cgptopt-sphere-wrapper';
     document.body.appendChild(wrapper);
 
-    function updateWrapperPosition() {
-      const textarea = document.getElementById('prompt-textarea');
-      if (!textarea || !wrapper) return;
-      
-      const rect = textarea.getBoundingClientRect();
-      // Position at bottom-right of textarea, with some padding
-      wrapper.style.top = `${rect.bottom - 40}px`;
-      wrapper.style.left = `${rect.right - 70}px`;
-      
-      // Sync visibility
-      const isVisible = !!textarea.offsetParent;
-      wrapper.style.display = isVisible ? 'flex' : 'none';
-    }
+    // --- Hemisphere expansion (SVG Pie Menu) ---
+    const expansion = document.createElement('div');
+    expansion.className = 'cgptopt-hemisphere-expansion';
 
-    // Update position frequently for responsiveness
-    const posInterval = setInterval(updateWrapperPosition, 100);
-    window.addEventListener('resize', updateWrapperPosition);
-
-    // Optimize Button
-    const btn = document.createElement('button');
-    btn.className = 'cgptopt-optimize-btn';
-    btn.type = 'button';
-    btn.title = t('improvePrompt') || "Sihirli Değnek: Promptu Geliştir";
-    btn.innerHTML = `
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-      </svg>
-    `;
-
-    // Menu Trigger
-    const trigger = document.createElement('button');
-    trigger.className = 'cgptopt-menu-trigger';
-    trigger.type = 'button';
-    trigger.innerHTML = `
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="18 15 12 9 6 15"></polyline>
-      </svg>
-    `;
-
-    // Commands Menu
-    const menu = document.createElement('div');
-    menu.className = 'cgptopt-commands-menu';
-    
+    // PROMPT_STYLES dictionary for resolving icons/labels
     const PROMPT_STYLES = {
-      '/spec': { icon: '📐', tr: 'SPEC Yöntemi', en: 'SPEC Method' },
-      '/cot': { icon: '🧠', tr: 'Chain of Thought', en: 'Chain of Thought' },
-      '/feynman': { icon: '👶', tr: 'Feynman Tekniği', en: 'Feynman Technique' },
-      '/socratic': { icon: '🏛️', tr: 'Sokratik Yöntem', en: 'Socratic Method' },
-      '/step': { icon: '🪜', tr: 'Adım Adım', en: 'Step-by-Step' },
-      '/tot': { icon: '🌳', tr: 'Tree of Thoughts', en: 'Tree of Thoughts' },
-      '/first': { icon: '🧱', tr: 'İlk İlkeler', en: 'First Principles' },
-      '/few': { icon: '💡', tr: 'Few-Shot', en: 'Few-Shot' },
-      '/expert': { icon: '🎓', tr: 'Uzman Görüşü', en: 'Expert Perspective' },
-      '/debate': { icon: '⚖️', tr: 'Münazara Modu', en: 'Debate Mode' },
-      '/table': { icon: '📊', tr: 'Tablo Formatı', en: 'Tabular Output' },
-      '/critic': { icon: '🧐', tr: 'Eleştirel Analiz', en: 'Critical Analysis' },
-      '/analog': { icon: '🔗', tr: 'Analoji Kurma', en: 'Analogy Making' },
-      '/code': { icon: '💻', tr: 'Kod Mantığı', en: 'Code Logic' },
-      '/negative': { icon: '🚫', tr: 'Negatif Sınır', en: 'Negative Constraints' },
-      '/creative': { icon: '🎭', tr: 'Yaratıcı Hikaye', en: 'Creative Story' },
-      '/risks': { icon: '⚠️', tr: 'Risk Analizi', en: 'Risk Analysis' },
-      '/future': { icon: '🔮', tr: 'Gelecek Öngörüsü', en: 'Future Foresight' },
-      '/summary': { icon: '📉', tr: 'Yönetici Özeti', en: 'Executive Summary' },
-      '/interact': { icon: '💬', tr: 'Etkileşimli', en: 'Interactive Mode' }
+      '/image': { icon: '🎨', label: 'Görsel' },
+      '/makale': { icon: '📝', label: 'Makale' },
+      '/mail': { icon: '📧', label: 'E-posta' },
+      '/spec': { icon: '📐', label: 'SPEC' },
+      '/cot': { icon: '🧠', label: 'CoT' },
+      '/feynman': { icon: '👶', label: 'Feynman' },
+      '/socratic': { icon: '🏛️', label: 'Sokratik' },
+      '/step': { icon: '🪜', label: 'Adım Adım' },
+      '/tot': { icon: '🌳', label: 'ToT' },
+      '/first': { icon: '🧱', label: 'İlk İlkeler' },
+      '/few': { icon: '💡', label: 'Few-Shot' },
+      '/expert': { icon: '🎓', label: 'Uzman' },
+      '/debate': { icon: '⚖️', label: 'Münazara' },
+      '/table': { icon: '📊', label: 'Tablo' },
+      '/critic': { icon: '🧐', label: 'Eleştirel' },
+      '/analog': { icon: '🔗', label: 'Analoji' },
+      '/code': { icon: '💻', label: 'Kod' },
+      '/negative': { icon: '🚫', label: 'Negatif' },
+      '/creative': { icon: '🎭', label: 'Yaratıcı' },
+      '/risks': { icon: '⚠️', label: 'Risk' },
+      '/future': { icon: '🔮', label: 'Gelecek' },
+      '/summary': { icon: '📉', label: 'Özet' },
+      '/interact': { icon: '💬', label: 'Etkileşim' }
     };
 
-    const standardCommands = [
-      { id: '/image', icon: '🎨', tr: 'Görsel Üret', en: 'Create Image' },
-      { id: '/makale', icon: '📝', tr: 'Makale Yaz', en: 'Write Article' },
-      { id: '/mail', icon: '📧', tr: 'E-posta Yaz', en: 'Write Email' }
-    ];
+    // Use selected styles from settings, limit to 5
+    const selectedIds = (settings.selectedStyles && settings.selectedStyles.length > 0)
+      ? settings.selectedStyles.slice(0, 5)
+      : ['/image', '/makale', '/spec', '/summary', '/mail'];
 
-    const dynamicCommands = (settings.selectedStyles || []).map(id => {
-      const style = PROMPT_STYLES[id];
-      if (!style) return null;
-      return { id, icon: style.icon, tr: style.tr, en: style.en };
-    }).filter(Boolean);
+    const items = selectedIds.map(id => ({
+      id: id,
+      icon: PROMPT_STYLES[id] ? PROMPT_STYLES[id].icon : '✨',
+      label: PROMPT_STYLES[id] ? PROMPT_STYLES[id].label : id
+    }));
 
-    const allCommands = [...standardCommands, ...dynamicCommands];
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('width', '80');
+    svg.setAttribute('height', '160');
+    svg.setAttribute('viewBox', '0 0 80 160');
+    svg.style.overflow = 'visible';
 
-    allCommands.forEach(cmd => {
-      const item = document.createElement('div');
-      item.className = 'cgptopt-menu-item';
-      item.innerHTML = `<span>${cmd.icon}</span> ${settings.optimizerLanguage === 'tr' ? cmd.tr : cmd.en}`;
-      item.onclick = (e) => {
+    // Mathematically generate SVG paths for N slices of the left hemisphere
+    // Hemisphere starts from Top (270 deg) to Bottom (90 deg) sweeping left
+    const n = items.length;
+    const totalAngle = 180;
+    const angleStep = totalAngle / n;
+    const startAngle = 270; // Top
+
+    const slicesData = items.map((item, index) => {
+      // Angle goes counter-clockwise: 270 -> 180 -> 90
+      const a1 = startAngle - (index * angleStep);
+      const a2 = startAngle - ((index + 1) * angleStep);
+      
+      const rad1 = a1 * Math.PI / 180;
+      const rad2 = a2 * Math.PI / 180;
+
+      const cx = 80, cy = 80, r = 80;
+      
+      const x1 = cx + r * Math.cos(rad1);
+      const y1 = cy + r * Math.sin(rad1);
+      const x2 = cx + r * Math.cos(rad2);
+      const y2 = cy + r * Math.sin(rad2);
+
+      // M cx,cy L x1,y1 A r,r 0 0,0 x2,y2 Z  (0 for sweep-flag = counter-clockwise)
+      const path = `M ${cx},${cy} L ${x1.toFixed(2)},${y1.toFixed(2)} A ${r},${r} 0 0,0 ${x2.toFixed(2)},${y2.toFixed(2)} Z`;
+
+      // Text coordinates (radius = 50)
+      const midRad = ((a1 + a2) / 2) * Math.PI / 180;
+      const textX = cx + 50 * Math.cos(midRad);
+      const textY = cy + 50 * Math.sin(midRad);
+
+      return { path, textX, textY, item };
+    });
+
+    slicesData.forEach(data => {
+      const g = document.createElementNS(svgNS, 'g');
+      g.className.baseVal = 'cgptopt-slice-group';
+      
+      const path = document.createElementNS(svgNS, 'path');
+      path.setAttribute('d', data.path);
+      path.className.baseVal = 'cgptopt-slice-path';
+
+      const text = document.createElementNS(svgNS, 'text');
+      text.setAttribute('x', data.textX);
+      text.setAttribute('y', data.textY);
+      text.setAttribute('dominant-baseline', 'middle');
+      text.setAttribute('text-anchor', 'middle');
+      text.className.baseVal = 'cgptopt-slice-icon';
+      text.textContent = data.item.icon;
+
+      // Tooltip natively provided by <title> element inside <g>
+      const title = document.createElementNS(svgNS, 'title');
+      title.textContent = data.item.label;
+
+      g.appendChild(title);
+      g.appendChild(path);
+      g.appendChild(text);
+
+      g.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
-        const currentVal = textarea.innerText || textarea.value || "";
-        const newVal = cmd.id + " " + currentVal.replace(/^\/[a-z]+ /i, '').trim();
-        
-        if (textarea.tagName === 'DIV') {
-          textarea.innerText = newVal;
+        const ta = document.getElementById('prompt-textarea');
+        if (!ta) return;
+        const currentVal = ta.innerText || ta.value || '';
+        // Eğer en başta mevcut bir komut (örneğin /image, /makale vs) varsa onu sil ve yenisini yaz
+        const cleanedVal = currentVal.replace(/^\/[\w\-]+(\s+)?/, '').trim();
+        const newVal = data.item.id + ' ' + cleanedVal;
+        if (ta.tagName === 'DIV') {
+          ta.innerText = newVal;
         } else {
-          textarea.value = newVal;
+          ta.value = newVal;
         }
-        
-        textarea.focus();
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-        menu.classList.remove('show');
+        ta.focus();
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
       };
-      menu.appendChild(item);
+
+      svg.appendChild(g);
     });
 
-    trigger.onclick = (e) => {
+    expansion.appendChild(svg);
+
+    // --- Main sphere (star icon) which NOW acts as the Optimize button ---
+    const mainSphere = document.createElement('div');
+    mainSphere.className = 'cgptopt-main-sphere';
+    mainSphere.title = t('improvePrompt') || 'Sihirli Yıldız: Promptu Geliştir';
+    mainSphere.innerHTML = `
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+    `;
+
+    mainSphere.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      menu.classList.toggle('show');
-    };
-
-    document.addEventListener('click', () => {
-      menu.classList.remove('show');
-    });
-
-    btn.onclick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (btn.classList.contains('loading')) return;
-      
-      const text = textarea.innerText || textarea.value || "";
+      if (mainSphere.classList.contains('loading')) return;
+      const ta = document.getElementById('prompt-textarea');
+      const text = ta ? (ta.innerText || ta.value || '') : '';
       if (!text.trim()) return;
-
-      btn.classList.add('loading');
+      mainSphere.classList.add('loading');
       const requestId = Math.random().toString(36).substring(7);
       window.dispatchEvent(new CustomEvent('cgptopt-optimize', { detail: { text, requestId } }));
     };
 
-    wrapper.appendChild(menu);
-    wrapper.appendChild(btn);
-    wrapper.appendChild(trigger);
-    
-    container.style.position = 'relative';
-    container.appendChild(wrapper);
+    wrapper.appendChild(expansion);
+    wrapper.appendChild(mainSphere);
+
+    function updatePosition() {
+      const ta = document.getElementById('prompt-textarea');
+      if (!ta || !wrapper) return;
+      const rect = ta.getBoundingClientRect();
+      wrapper.style.top  = `${rect.top + rect.height / 2 - 22}px`;
+      wrapper.style.left = `${rect.left - 95}px`; // Fully outside, further left
+      wrapper.style.display = !!ta.offsetParent ? 'flex' : 'none';
+    }
+
+    setInterval(updatePosition, 100);
+    window.addEventListener('resize', updatePosition);
   }
 
   window.addEventListener('message', (event) => {
@@ -397,6 +432,12 @@
           } 
         }, '*');
       });
+    } else if (event.data.type === 'cgptopt-remember-off') {
+      const btn = document.getElementById('cgptopt-remember-btn');
+      if (btn && btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        btn.innerHTML = '🧠 Hatırla (Kapalı)';
+      }
     } else if (event.data.type === 'cgptopt-optimize-result') {
       const { optimized, requestId, error } = event.data.payload || {};
       const textarea = document.getElementById('prompt-textarea');
@@ -449,7 +490,8 @@
         return;
       }
       injectStarButtons();
-      injectPromptOptimizer();
+
+      injectSphereMenu();
     });
     observer.observe(document.body, { childList: true, subtree: true });
   }
@@ -558,6 +600,25 @@
     });
   }
 
+  function injectRememberButton() {
+    if (!settings.enabled) return;
+    if (document.getElementById('cgptopt-remember-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'cgptopt-remember-btn';
+    btn.className = 'cgptopt-remember-btn';
+    btn.innerHTML = '🧠 Hatırla (Kapalı)';
+    btn.title = 'Tıkladığınızda sonraki mesajınızda sohbetin tüm geçmişi gönderilir. (Otonom kapanır)';
+    
+    btn.onclick = () => {
+      const isActive = btn.classList.toggle('active');
+      btn.innerHTML = isActive ? '🧠 Hatırla (Açık)' : '🧠 Hatırla (Kapalı)';
+      window.postMessage({ source: 'cgpt_optimizer_content', type: 'cgptopt-set-remember', payload: isActive }, '*');
+    };
+
+    document.body.appendChild(btn);
+  }
+
   async function init() {
     try {
       const raw = await storageArea().get([CONFIG_KEY, STARRED_KEY]);
@@ -584,7 +645,9 @@
       setupMessages();
       setupObserver();
       injectStarButtons();
-      injectPromptOptimizer();
+
+      injectSphereMenu();
+      injectRememberButton();
       
       notifyMainStatusRequest();
       if (!document.hidden) {

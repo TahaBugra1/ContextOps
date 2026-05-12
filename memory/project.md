@@ -1,4 +1,4 @@
-﻿# ChatGPT Optimizer - Proje Hafzas
+# ChatGPT Optimizer - Proje Hafzas
 
 ## Proje Amac
 ChatGPT zerindeki uzun sohbetlerde yaanan donmalar engellemek iin eski mesajlar dinamik olarak gizleyen ve Groq API destei ile ham metinleri profesyonel "Prompt Mhendislii" teknikleriyle (20 farkl yntem) optimize eden ileri seviye bir tarayc eklentisi.
@@ -24,6 +24,11 @@ Eklenti, ham kullanc girdisini 20 farkl akademik ve teknik ynteme gre optimize e
 
 ### 3. Hafza Ynetimi (Memory Guard)
 - Belirlenmi limit (Varsaylan: 5-200 aras) aldnda eski mesajlar DOM zerinden kaldrarak tarayc performansn korur.
+
+### 4. Sphere Menu (Quick Access)
+- Metin kutusunun solunda yer alan, yldz ikonlu ve hover durumunda yarm kre eklinde genileyen modern bir men.
+- 4 farkl dilim iinde hzl komutlar (/image, /makale, /mail, /summary) barndrr.
+- Glassmorphism ve yumuak animasyonlarla premium bir deneyim sunar.
 
 ## Klasr Yaps
 - memory/: Proje hafzas (project.md) ve gnlkler (ctivity_log_YYYY-MM-DD.md).

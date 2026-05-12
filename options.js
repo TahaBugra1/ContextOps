@@ -7,10 +7,13 @@ const DEFAULTS = {
   optimizerEnabled: true,
   optimizerLanguage: 'en',
   groq_key: '',
-  selectedStyles: ['/spec', '/cot', '/feynman', '/socratic', '/step']
+  selectedStyles: ['/image', '/makale', '/spec', '/summary', '/mail']
 };
 
 const PROMPT_STYLES = {
+  '/image': { icon: '🎨', tr: 'Görsel', en: 'Image' },
+  '/makale': { icon: '📝', tr: 'Makale', en: 'Article' },
+  '/mail': { icon: '📧', tr: 'E-posta', en: 'Email' },
   '/spec': { icon: '📐', tr: 'SPEC Yöntemi', en: 'SPEC Method' },
   '/cot': { icon: '🧠', tr: 'Chain of Thought', en: 'Chain of Thought' },
   '/feynman': { icon: '👶', tr: 'Feynman Tekniği', en: 'Feynman Technique' },

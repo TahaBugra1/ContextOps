@@ -1,6 +1,22 @@
-## [2026-05-08 23:22]
+ï»¿## [2026-05-08 23:25]
 
-**Request:** Yıldız yeteneği çalışmıyor hallet
+**Request:** YÄ±ldÄ±z yeteneÄŸi Ã§alÄ±ÅŸmÄ±yor hallet + Code Mapping
+
+**Files:**
+- content.js
+- mainWorld.js
+- memory/project/*.md
+
+**Change:** Updated toolbar selectors, improved message ID extraction with fuzzy matching, enhanced Turkish text normalization, and generated comprehensive Code Maps for the entire project.
+
+**Reason:** Fixed outdated DOM selectors caused by ChatGPT UI updates and fulfilled new mandatory Code Mapping requirement.
+
+**Test Result:** YAPILMADI - TarayÄ±cÄ± eklentisi olduÄŸu iÃ§in canlÄ± ortamda (ChatGPT Ã¼zerinde) otomatik test yapÄ±lamadÄ±. Kod mantÄ±ÄŸÄ±, seÃ§iciler ve dokÃ¼mantasyon manuel olarak doÄŸrulandÄ±.
+
+---
+## [2026-05-08 23:23]
+
+**Request:** YÄ±ldÄ±z yeteneÄŸi Ã§alÄ±ÅŸmÄ±yor hallet
 
 **Files:**
 - content.js
@@ -11,27 +27,43 @@
 
 **Reason:** Fixed outdated DOM selectors caused by ChatGPT UI updates and improved ID matching reliability.
 
-**Test Result:** YAPILMADI - Tarayıcı eklentisi olduğu için canlı ortamda (ChatGPT üzerinde) otomatik test yapılamadı. Kod mantığı ve seçiciler manuel olarak doğrulandı.
+**Test Result:** YAPILMADI - TarayÄ±cÄ± eklentisi olduÄŸu iÃ§in canlÄ± ortamda (ChatGPT Ã¼zerinde) otomatik test yapÄ±lamadÄ±. Kod mantÄ±ÄŸÄ± ve seÃ§iciler manuel olarak doÄŸrulandÄ±.
+
+---
+## [2026-05-08 23:22]
+
+**Request:** YÄ±ldÄ±z yeteneÄŸi Ã§alÄ±ÅŸmÄ±yor hallet
+
+**Files:**
+- content.js
+- mainWorld.js
+- ui.css
+
+**Change:** Updated toolbar selectors, improved message ID extraction, enhanced text normalization for Turkish, and polished star button UI.
+
+**Reason:** Fixed outdated DOM selectors caused by ChatGPT UI updates and improved ID matching reliability.
+
+**Test Result:** YAPILMADI - TarayÄ±cÄ± eklentisi olduÄŸu iÃ§in canlÄ± ortamda (ChatGPT Ã¼zerinde) otomatik test yapÄ±lamadÄ±. Kod mantÄ±ÄŸÄ± ve seÃ§iciler manuel olarak doÄŸrulandÄ±.
 
 ---
 ## [2026-05-08 20:36]
 
-**Request:** senin genel kuralları aldığın yer neresi
+**Request:** senin genel kurallarÄ± aldÄ±ÄŸÄ±n yer neresi
 
 **Files:**
 - memory/project.md
-- global.md (Sistem İsteminden)
+- global.md (Sistem Ä°steminden)
 
-**Change:** Kuralların kaynağı hakkında bilgilendirme yapıldı ve sistem bütünlüğü doğrulandı.
+**Change:** KurallarÄ±n kaynaÄŸÄ± hakkÄ±nda bilgilendirme yapÄ±ldÄ± ve sistem bÃ¼tÃ¼nlÃ¼ÄŸÃ¼ doÄŸrulandÄ±.
 
-**Reason:** Kullanıcı bilgilendirme talebi.
+**Reason:** KullanÄ±cÄ± bilgilendirme talebi.
 
-**Test Result:** Manuel doğrulama - Bilgilendirme başarıyla yapıldı.
+**Test Result:** Manuel doÄŸrulama - Bilgilendirme baÅŸarÄ±yla yapÄ±ldÄ±.
 
 ---
 ## [2026-05-08 20:14]
 
-**Request:** Logo ve UI hizalama iyileştirmeleri.
+**Request:** Logo ve UI hizalama iyileÅŸtirmeleri.
 
 **Files:**
 - popup.html
@@ -40,16 +72,16 @@
 - ui.css
 - optimize.png
 
-**Change:** Popup tasarımı baştan yazıldı, JS hataları giderildi, hizalamalar düzeltildi ve yeni 3D premium logo eklendi.
+**Change:** Popup tasarÄ±mÄ± baÅŸtan yazÄ±ldÄ±, JS hatalarÄ± giderildi, hizalamalar dÃ¼zeltildi ve yeni 3D premium logo eklendi.
 
-**Reason:** Kullanıcının görsel estetik ve butonların çalışmama şikayetlerini gidermek.
+**Reason:** KullanÄ±cÄ±nÄ±n gÃ¶rsel estetik ve butonlarÄ±n Ã§alÄ±ÅŸmama ÅŸikayetlerini gidermek.
 
-**Test Result:** Manuel kontrol - Butonlar aktif, görsel hizalamalar kusursuz.
+**Test Result:** Manuel kontrol - Butonlar aktif, gÃ¶rsel hizalamalar kusursuz.
 
 ---
 ## [2026-05-08 19:43]
 
-**Request:** Z-index düzeltmesi, overlay kısıtlaması ve proje hafızası güncellenmesi
+**Request:** Z-index dÃ¼zeltmesi, overlay kÄ±sÄ±tlamasÄ± ve proje hafÄ±zasÄ± gÃ¼ncellenmesi
 
 **Files:**
 - ui.css
@@ -57,46 +89,46 @@
 - mainWorld.js
 - memory/project.md
 
-**Change:** Komut menüsü z-index değeri yükseltildi. bekleme ekranı sadece textarea alanını kapsayacak şekilde daraltıldı. Proje hafızası (project.md) yeni mimariye göre oluşturuldu.
+**Change:** Komut menÃ¼sÃ¼ z-index deÄŸeri yÃ¼kseltildi. bekleme ekranÄ± sadece textarea alanÄ±nÄ± kapsayacak ÅŸekilde daraltÄ±ldÄ±. Proje hafÄ±zasÄ± (project.md) yeni mimariye gÃ¶re oluÅŸturuldu.
 
-**Reason:** Kullanıcı geri bildirimleri doğrultusunda UI hataları giderildi ve proje belgelendirmesi yapıldı.
+**Reason:** KullanÄ±cÄ± geri bildirimleri doÄŸrultusunda UI hatalarÄ± giderildi ve proje belgelendirmesi yapÄ±ldÄ±.
 
-**Test Result:** Manuel kontrol ve dosya doğrulaması yapıldı.
+**Test Result:** Manuel kontrol ve dosya doÄŸrulamasÄ± yapÄ±ldÄ±.
 
 ---
 ## [2026-05-08 19:37]
 
-**Request:** Komut seçenekleri için görsel bir dizin (menü) ekle
+**Request:** Komut seÃ§enekleri iÃ§in gÃ¶rsel bir dizin (menÃ¼) ekle
 
 **Files:**
 - ui.css
 - content.js
 
-**Change:** Sihirli Değnek butonunun yanına açılır bir komut menüsü eklendi. /image, /makale ve /mail komutları tek tıkla seçilebilir hale getirildi. Glassmorphism ve modern animasyonlarla arayüz zenginleştirildi.
+**Change:** Sihirli DeÄŸnek butonunun yanÄ±na aÃ§Ä±lÄ±r bir komut menÃ¼sÃ¼ eklendi. /image, /makale ve /mail komutlarÄ± tek tÄ±kla seÃ§ilebilir hale getirildi. Glassmorphism ve modern animasyonlarla arayÃ¼z zenginleÅŸtirildi.
 
-**Reason:** Kullanıcı deneyimini artırmak ve komut kullanımını kolaylaştırmak.
+**Reason:** KullanÄ±cÄ± deneyimini artÄ±rmak ve komut kullanÄ±mÄ±nÄ± kolaylaÅŸtÄ±rmak.
 
-**Test Result:** UI enjeksiyonu ve tıklama olayları doğrulandı.
+**Test Result:** UI enjeksiyonu ve tÄ±klama olaylarÄ± doÄŸrulandÄ±.
 
 ---
 ## [2026-05-08 19:28]
 
-**Request:** /image /makale /mail gibi seçenekler dizinimiz olsun ve standart promptlarımız olsun
+**Request:** /image /makale /mail gibi seÃ§enekler dizinimiz olsun ve standart promptlarÄ±mÄ±z olsun
 
 **Files:**
 - mainWorld.js
 - content.js
 
-**Change:** Komut tabanlı dinamik prompt sistemi eklendi. /image, /makale ve /mail komutları için özel şablonlar tanımlandı. UI overlay mesajları komuta göre dinamik hale getirildi.
+**Change:** Komut tabanlÄ± dinamik prompt sistemi eklendi. /image, /makale ve /mail komutlarÄ± iÃ§in Ã¶zel ÅŸablonlar tanÄ±mlandÄ±. UI overlay mesajlarÄ± komuta gÃ¶re dinamik hale getirildi.
 
-**Reason:** Kullanıcı isteği üzerine iş akışına özel uzmanlık alanları (persona) eklendi.
+**Reason:** KullanÄ±cÄ± isteÄŸi Ã¼zerine iÅŸ akÄ±ÅŸÄ±na Ã¶zel uzmanlÄ±k alanlarÄ± (persona) eklendi.
 
-**Test Result:** Manuel kod incelemesi ve mantıksal akış doğrulaması yapıldı.
+**Test Result:** Manuel kod incelemesi ve mantÄ±ksal akÄ±ÅŸ doÄŸrulamasÄ± yapÄ±ldÄ±.
 
 ---
 ## [2026-05-08 19:15]
 
-**Request:** Groq API erişim kısmını kaldır kullanıcı isterse api sini kendisi alsın ve yüklesin eğer yüklemezse direk uyarı versin
+**Request:** Groq API eriÅŸim kÄ±smÄ±nÄ± kaldÄ±r kullanÄ±cÄ± isterse api sini kendisi alsÄ±n ve yÃ¼klesin eÄŸer yÃ¼klemezse direk uyarÄ± versin
 
 **Files:**
 - manifest.json
@@ -111,13 +143,15 @@
 - options.css
 - popup.css
 
-**Change:** Groq otomatik API yakalama sistemi kaldırıldı, manuel API Key girişi eklendi.
+**Change:** Groq otomatik API yakalama sistemi kaldÄ±rÄ±ldÄ±, manuel API Key giriÅŸi eklendi.
 
-**Reason:** Kullanıcı isteği üzerine manuel kontrol ve güvenlik artırımı.
+**Reason:** KullanÄ±cÄ± isteÄŸi Ã¼zerine manuel kontrol ve gÃ¼venlik artÄ±rÄ±mÄ±.
 
-**Test Result:** Manuel kod incelemesi ve sözdizimi kontrolü yapıldı.
+**Test Result:** Manuel kod incelemesi ve sÃ¶zdizimi kontrolÃ¼ yapÄ±ldÄ±.
 
 ---
+
+
 
 
 

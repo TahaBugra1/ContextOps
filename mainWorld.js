@@ -9,6 +9,7 @@
   let currentOptimizationRequestId = null;
   let lastCurrentNode = null; 
   let lastConversationId = null; // Track current conversation for worker reset
+  let rememberAllActive = false; // State for "Hatırla" toggle
  // Default fallback
   const EXTRA_KEY = 'cgpt_optimizer_extra_v1';
   const DEFAULTS = {
@@ -138,7 +139,7 @@
 
     const visibleIds = path.filter(id => isVisibleMessageNode(mapping[id]));
     const extra = parseExtra();
-    const limit = settings.limit + extra;
+    const limit = rememberAllActive ? Infinity : settings.limit + extra;
 
     const keptSet = new Set();
     // Keep root and potentially first system prompt (first 2 nodes)
@@ -320,6 +321,11 @@
 
         postStatus(trimmed.status);
 
+        if (rememberAllActive) {
+          rememberAllActive = false;
+          window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-remember-off' }, '*');
+        }
+
         const headers = new Headers(response.headers);
         headers.delete('content-length');
         headers.delete('content-encoding');
@@ -340,36 +346,46 @@
 
 function normalizeText(text) {
   if (!text) return '';
-  return text.toString().toLowerCase()
-    .replace(/[\s\n\r\t]+/g, ' ') // Handle all whitespace
-    .replace(/[^\w\sğüşıöçĞÜŞİÖÇ]/g, '') // Include all Turkish characters
-    .trim();
+  try {
+    return text.toString().toLocaleLowerCase('tr-TR')
+      .replace(/[\s\n\r\t]+/g, ' ') // Handle all whitespace
+      .replace(/[^\w\sğüşıöçĞÜŞİÖÇ]/g, '') // Include all Turkish characters
+      .trim();
+  } catch (e) {
+    // Fallback to standard lowercase if locale fails
+    return text.toString().toLowerCase()
+      .replace(/[\s\n\r\t]+/g, ' ')
+      .replace(/[^\w\sğüşıöçĞÜŞİÖÇ]/g, '')
+      .trim();
+  }
 }
 
 function tagMessages() {
   if (!currentMapping) return;
-  // UPDATED: Added more message container selectors
+  // UPDATED: Added more robust selectors for the latest ChatGPT UI
   const articles = document.querySelectorAll('article, [data-testid^="conversation-turn-"], div[class*="ChatMessage"], div[class*="message_wrapper"]');
 
   articles.forEach(article => {
     if (article.hasAttribute('data-cgptopt-id')) return;
 
-    // UPDATED: More targeted text extraction
+    // UPDATED: Better content extraction, specifically targeting the message content area
     const textNode = article.querySelector('.markdown') || 
                      article.querySelector('[data-message-author-role]') ||
-                     article.querySelector('.flex-col.gap-1.md\\:gap-3') || 
+                     article.querySelector('.flex-col.gap-1.md\\:gap-3') ||
+                     article.querySelector('div[class*="content"]') ||
                      article;
                      
     const domText = normalizeText(textNode.textContent);
-    if (domText.length < 5) return;
+    if (domText.length < 3) return; // Allow shorter messages to be tagged
 
     const match = Object.entries(currentMapping).find(([id, node]) => {
       if (!node.message || !node.message.content || !node.message.content.parts) return false;
       const partText = normalizeText(node.message.content.parts.join(' '));
-      if (partText.length < 5) return false;
+      if (partText.length < 3) return false;
 
-      // Check if one contains a significant portion of the other
-      return partText.includes(domText) || domText.includes(partText);
+      // Fuzzy matching: check if text overlaps significantly
+      return partText.includes(domText) || domText.includes(partText) || 
+             (domText.length > 20 && partText.substring(0, 50).includes(domText.substring(0, 50)));
     });
 
     if (match) {
@@ -393,6 +409,13 @@ window.addEventListener('cgptopt-config', (event) => {
   }
   settings = sanitize({ ...settings, ...incoming });
   postStatus({ active: Boolean(settings.enabled && settings.autoTrim) });
+});
+
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.source === 'cgpt_optimizer_content' && event.data.type === 'cgptopt-set-remember') {
+    rememberAllActive = !!event.data.payload;
+    console.log('[CGPTOpt] Hatırla state set to:', rememberAllActive);
+  }
 });
 
 function generateUUID() {
