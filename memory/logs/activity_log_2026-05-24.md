@@ -1,4 +1,18 @@
-﻿## [2026-05-24 17:10]
+﻿## [2026-05-24 17:18]
+
+**Request:** Konsol spam loglarini temizleme ve intl eksik ceviri uyarisini inceleme.
+
+**Files:**
+- mainWorld.js
+
+**Change:** mainWorld.js icindeki Aggressive Header Capture logunun her fetch isteginde spora donuserek konsolu doldurmasi engellendi; artik yalnizca token degistiginde veya ilk yuklemede tek sefer log atacak.
+
+**Reason:** Konsol kalabaligini azaltmak ve gelistirici deneyimini iyilestirmek.
+
+**Test Result:** manual check - console logs cleaned and verified.
+
+---
+## [2026-05-24 17:10]
 
 **Request:** merhaba sisteme rag çalışması ekleyelim diyorum gizlediğimiz mesajlar unutulması yerine rag ile hızlı bir şekilde çekilse daha iyi olur diye düşünüyorum ayrcıa uzun mesajlarda yıldız işaretleme react sızıntıyı tespit edilmesinden dolayı çöküyor kamuflaj yapalım
 
@@ -14,4 +28,5 @@
 **Test Result:** manual check - lint clean, import successful, RAG logic and absolute CSS position verified.
 
 ---
+
 

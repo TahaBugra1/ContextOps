@@ -253,7 +253,7 @@
           currentAuth = hObj.get('Authorization') || hObj.get('X-Authorization');
         }
 
-        if (currentAuth) {
+        if (currentAuth && authToken !== currentAuth) {
           const authObj = Object.fromEntries(new Headers(hObj).entries());
           delete authObj['content-type'];
           delete authObj['content-length'];
