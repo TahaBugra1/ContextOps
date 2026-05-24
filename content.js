@@ -144,18 +144,6 @@
     const currentStarred = getStarredIdsForCurrentConversation();
     
     messages.forEach((msg) => {
-      // Find a suitable place for the button (look for standard toolbars or actions area)
-      // UPDATED: Added [data-testid$="-actions"] which is common in newer ChatGPT versions
-      const toolbar = msg.querySelector('[data-testid$="-actions"]') ||
-                      msg.querySelector('.flex.justify-between.gap-2') || 
-                      msg.querySelector('.flex.items-center.gap-1') ||
-                      msg.querySelector('.flex.justify-between') || 
-                      msg.querySelector('.empty\\:hidden') ||
-                      msg.querySelector('div[class*="toolbar"]') ||
-                      msg.querySelector('.justify-start.flex'); 
-      
-      if (!toolbar) return;
-
       let btn = msg.querySelector('.cgptopt-star-btn');
       
       // Try to find the message ID from various locations in the DOM
@@ -171,12 +159,13 @@
         btn.className = 'cgptopt-star-btn';
         btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
         
-        // Inject before the first child of toolbar for better positioning
-        if (toolbar.firstChild) {
-          toolbar.insertBefore(btn, toolbar.firstChild);
-        } else {
-          toolbar.appendChild(btn);
+        // Ensure relative position so absolute star button positions perfectly
+        if (msg.style.position !== 'relative') {
+          msg.style.position = 'relative';
         }
+
+        // Append directly to outer message container to prevent dynamic React toolbar crashes
+        msg.appendChild(btn);
         
         btn.onclick = async (e) => {
           e.preventDefault();
@@ -204,12 +193,9 @@
         btn.classList.toggle('starred', isStarred);
         msg.classList.toggle('cgptopt-starred-message', isStarred);
         btn.title = t(isStarred ? 'unstar' : 'star');
-        btn.style.opacity = "1";
         btn.style.cursor = "pointer";
-        btn.style.display = "inline-flex"; // Ensure it's visible
       } else {
         btn.title = "ID matching...";
-        btn.style.opacity = "0.3";
         btn.style.cursor = "wait";
       }
     });

@@ -132,6 +132,9 @@
   function trimConversationPayload(payload) {
     if (!payload || !payload.mapping || !payload.current_node) return null;
 
+    // Save full original history to RAG memory before trimming
+    saveToRagStore(payload);
+
     const mapping = payload.mapping;
     lastCurrentNode = payload.current_node; // Capture node for context
     const path = buildPath(mapping, payload.current_node);
@@ -182,7 +185,8 @@
       }
     });
 
-    const finalRendered = Array.from(keptSet).filter(id => isVisibleMessageNode(mapping[id])).length;
+    activeKeptIds = Array.from(keptSet);
+    const finalRendered = activeKeptIds.filter(id => isVisibleMessageNode(mapping[id])).length;
     console.log(`[CGPTOpt] Trim Done. Visible kept: ${finalRendered}, Total path: ${path.length}`);
 
     // Set conversation ID if not already set
@@ -301,6 +305,49 @@
 
       resetExtraAfterNewPrompt(url, method, init.body);
 
+      // Check if it's a new prompt POST request to inject RAG context
+      if (settings.enabled && settings.autoTrim && method === 'POST' && /\/backend-api\/conversation(\?|$)/.test(url)) {
+        try {
+          if (init.body) {
+            const body = JSON.parse(init.body);
+            if (body.messages && body.messages[0] && body.messages[0].content && body.messages[0].content.parts) {
+              const userPrompt = body.messages[0].content.parts[0];
+              const convId = body.conversation_id || new URL(location.href).pathname.split('/').pop();
+              
+              if (userPrompt && convId && convId.length > 10) {
+                const relevantDocs = searchRagStore(userPrompt, convId, activeKeptIds);
+                if (relevantDocs.length > 0) {
+                  console.log(`[CGPTOpt] RAG: Injecting ${relevantDocs.length} relevant archived messages into prompt context.`);
+                  
+                  let ragContext = "";
+                  if (settings.optimizerLanguage === 'tr') {
+                    ragContext = "\n\n--- Bilgi Hafızası (RAG - Geçmişteki İlgili Mesajlar) ---\n" +
+                      relevantDocs.map(d => `* Yazan: ${d.role === 'user' ? 'Kullanıcı' : 'Asistan'}\n  İçerik: ${d.text.substring(0, 400)}${d.text.length > 400 ? '...' : ''}`).join('\n') +
+                      "\n-----------------------------------------------------";
+                  } else {
+                    ragContext = "\n\n--- Memory Archive (RAG - Relevant Past Messages) ---\n" +
+                      relevantDocs.map(d => `* Author: ${d.role === 'user' ? 'User' : 'Assistant'}\n  Content: ${d.text.substring(0, 400)}${d.text.length > 400 ? '...' : ''}`).join('\n') +
+                      "\n-----------------------------------------------------";
+                  }
+                  
+                  body.messages[0].content.parts[0] = userPrompt + ragContext;
+                  init.body = JSON.stringify(body);
+                  
+                  // Show a premium visual notification (toast) to user that RAG helped
+                  window.postMessage({
+                    source: 'cgpt_optimizer_main',
+                    type: 'cgptopt-status-toast',
+                    payload: { message: settings.optimizerLanguage === 'tr' ? "🧠 Geçmiş mesajlar RAG ile hatırlandı!" : "🧠 Past messages recalled via RAG!" }
+                  }, '*');
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.error('[CGPTOpt] RAG injection failed', e);
+        }
+      }
+
       if (!(settings.enabled && settings.autoTrim && isConversationGet(url, method))) {
         return originalFetch(...args);
       }
@@ -343,6 +390,7 @@
   }
 
   let currentMapping = null;
+  let activeKeptIds = [];
 
 function normalizeText(text) {
   if (!text) return '';
@@ -357,6 +405,95 @@ function normalizeText(text) {
       .replace(/[\s\n\r\t]+/g, ' ')
       .replace(/[^\w\sğüşıöçĞÜŞİÖÇ]/g, '')
       .trim();
+  }
+}
+
+/*
+ * Purpose:      Saves full conversation messages to local storage for RAG search
+ * Inputs:       payload (object)
+ * Outputs:      none
+ * Dependencies: localStorage, buildPath, isVisibleMessageNode
+ * Usage:        Called in trimConversationPayload before trimming
+ */
+function saveToRagStore(payload) {
+  try {
+    const url = new URL(location.href);
+    const convId = url.pathname.split('/').pop();
+    if (!convId || convId.length < 10) return;
+
+    const mapping = payload.mapping;
+    const path = buildPath(mapping, payload.current_node);
+    const messages = path
+      .filter(id => isVisibleMessageNode(mapping[id]))
+      .map(id => {
+        const node = mapping[id];
+        const role = node.message.author.role;
+        const parts = node.message.content.parts || [];
+        const text = parts.join(' ').trim();
+        return { id, role, text, timestamp: Date.now() };
+      });
+
+    if (messages.length > 0) {
+      localStorage.setItem(`cgptopt_rag_${convId}`, JSON.stringify(messages));
+      console.log(`[CGPTOpt] RAG: Saved ${messages.length} messages for conversation ${convId}`);
+    }
+  } catch (e) {
+    console.error('[CGPTOpt] RAG save failed', e);
+  }
+}
+
+/*
+ * Purpose:      Searches RAG memory for relevant past messages not in current context
+ * Inputs:       queryText (string), convId (string), currentKeptIds (array of string)
+ * Outputs:      Array of relevant past messages
+ * Dependencies: localStorage, normalizeText
+ * Usage:        Called in patchFetch before sending new prompt
+ */
+function searchRagStore(queryText, convId, currentKeptIds) {
+  try {
+    const raw = localStorage.getItem(`cgptopt_rag_${convId}`);
+    if (!raw) return [];
+    const messages = JSON.parse(raw);
+    if (!Array.isArray(messages)) return [];
+
+    const queryNormalized = normalizeText(queryText);
+    const queryTokens = queryNormalized.split(/\s+/).filter(t => t.length > 2);
+    if (queryTokens.length === 0) return [];
+
+    // Turkish and English stop words list to filter out noisy common words
+    const stopWords = new Set(['ve', 'bir', 'ama', 'ile', 'de', 'da', 'için', 'bu', 'şu', 'o', 'ki', 'mi', 'mu', 'en', 'ise', 'daha', 'gibi', 'hem', 'her', 'veya', 'ya', 'the', 'and', 'a', 'of', 'to', 'in', 'is', 'it']);
+    const queryTerms = queryTokens.filter(t => !stopWords.has(t));
+    if (queryTerms.length === 0) return [];
+
+    const scored = [];
+    messages.forEach(msg => {
+      // Only search in messages that are NOT in the active trimmed view (currently kept in ChatGPT DOM)
+      if (currentKeptIds.includes(msg.id)) return;
+
+      const textNormalized = normalizeText(msg.text);
+      const textTokens = textNormalized.split(/\s+/);
+      
+      let score = 0;
+      queryTerms.forEach(term => {
+        // Check for exact matching or fuzzy match
+        const count = textTokens.filter(t => t.includes(term) || term.includes(t)).length;
+        if (count > 0) {
+          const termWeight = Math.min(2, term.length / 3);
+          score += count * termWeight;
+        }
+      });
+
+      if (score > 0) {
+        scored.push({ msg, score });
+      }
+    });
+
+    // Sort by score descending and return top K
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 2).map(item => item.msg);
+  } catch (e) {
+    console.error('[CGPTOpt] RAG search failed', e);
+    return [];
   }
 }
 
