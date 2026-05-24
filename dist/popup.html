@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChatGPT Optimizer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="wrap" id="popupRoot">
+    <!-- Header Section -->
+    <header class="header">
+      <div class="brand">
+        <img class="logo" src="optimize.png" alt="Logo">
+        <div class="brand-text">
+          <h1 data-i18n="extensionName">ChatGPT Optimizer</h1>
+          <span class="version">v2.5.0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Settings -->
+    <section class="section">
+      <label class="row-item">
+        <span class="label-text" data-i18n="enabledLabel"></span>
+        <div class="switch">
+          <input id="enabled" type="checkbox">
+          <span class="slider"></span>
+        </div>
+      </label>
+
+      <label class="row-item">
+        <span class="label-text" data-i18n="limitLabel"></span>
+        <input id="limit" class="input-number" type="number" min="1" max="200">
+      </label>
+    </section>
+
+    <!-- Memory Engine Section -->
+    <section class="turbo-card">
+      <div class="turbo-header">
+        <span class="icon">🧠</span>
+        <span class="title">RAG Memory Engine</span>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 10px;">
+        <div style="font-size: 12px; color: #aaa;">
+          Vector Count: <strong id="vectorCount">...</strong>
+        </div>
+        <div id="modelStatus" style="font-size: 11px; color: #10a37f; font-weight: 500;">
+          Initializing...
+        </div>
+      </div>
+
+      <button id="clearMemoryBtn" class="btn-outline full" style="border-color: #ff4a4a; color: #ff4a4a; font-size: 12px;">Clear Memory DB</button>
+    </section>
+
+    <!-- Turbo/Groq Section -->
+    <section class="turbo-card">
+      <div class="turbo-header">
+        <span class="icon">⚡</span>
+        <span class="title" data-i18n="groqBoostTitle">Groq AI Optimizer</span>
+      </div>
+      
+      <div id="groqStatusActive" class="status-badge active hidden">
+        <span class="dot"></span> <span data-i18n="groqBoostActive">Active</span>
+      </div>
+      
+      <div id="groqStatusWarning" class="status-badge warning hidden">
+        <span data-i18n="groqNoKeyWarning">API Key Missing</span>
+      </div>
+
+      <button id="openOptionsFromPopup" class="btn-primary full" data-i18n="setupGroqKey"></button>
+    </section>
+
+    <!-- Quick Actions -->
+    <footer class="footer">
+      <div class="button-grid">
+        <button id="loadOlder" class="btn-outline" data-i18n="loadOlder"></button>
+        <button id="trimNow" class="btn-outline" data-i18n="trimNow"></button>
+        <button id="openOptions" class="btn-outline wide" data-i18n="openSettings"></button>
+      </div>
+      <div id="status" class="toast-status"></div>
+      <p class="note" data-i18n="onlyChatgptScope"></p>
+    </footer>
+  </main>
+
+  <div id="blockedBanner" class="blocked hidden">
+    <div class="blocked-title" data-i18n="openChatgptTab"></div>
+    <div class="creator blocked-creator" data-i18n="creatorLine"></div>
+    <button id="openChatgpt" type="button" data-i18n="openChatgptNow"></button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

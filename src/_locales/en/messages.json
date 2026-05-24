@@ -1,0 +1,156 @@
+{
+  "extensionName": {
+    "message": "ChatGPT Optimizer"
+  },
+  "extensionDescription": {
+    "message": "Reduces lag in long chats by trimming old messages before rendering."
+  },
+  "creatorLine": {
+    "message": "Developed by: Yusuf Cinar & Taha Bugra Ak"
+  },
+  "activeLabel": {
+    "message": "Active"
+  },
+  "enabledLabel": {
+    "message": "Enabled"
+  },
+  "limitLabel": {
+    "message": "Message Limit (count)"
+  },
+  "apply": {
+    "message": "Apply"
+  },
+  "trimNow": {
+    "message": "Optimize Now"
+  },
+  "loadOlder": {
+    "message": "Load Older"
+  },
+  "hotReload": {
+    "message": "Hot Reload"
+  },
+  "openSettings": {
+    "message": "Open Settings"
+  },
+  "statusPaused": {
+    "message": "Paused"
+  },
+  "statusKeeping": {
+    "message": "Keeping last $1 messages",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "statusSearching": {
+    "message": "Preparing page"
+  },
+  "layoutUnsupported": {
+    "message": "This page layout is not supported"
+  },
+  "activeToast": {
+    "message": "Optimizer active"
+  },
+  "onlyChatgptScope": {
+    "message": "Only works on ChatGPT tabs"
+  },
+  "openChatgptTab": {
+    "message": "This extension only works on ChatGPT tabs"
+  },
+  "openChatgptNow": {
+    "message": "Open ChatGPT"
+  },
+  "settingsTitle": {
+    "message": "ChatGPT Optimizer Settings"
+  },
+  "autoTrimLabel": {
+    "message": "Auto-optimize"
+  },
+  "showToolbarLabel": {
+    "message": "Show in-page toolbar"
+  },
+  "resetDefaults": {
+    "message": "Reset Defaults"
+  },
+  "savedStatus": {
+    "message": "Settings saved"
+  },
+  "resetDone": {
+    "message": "Defaults restored"
+  },
+  "olderNotRecoverable": {
+    "message": "$1 older messages are no longer recoverable",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "renderedLabel": {
+    "message": "rendered"
+  },
+  "hiddenLabel": {
+    "message": "hidden"
+  },
+  "star": {
+    "message": "Pin"
+  },
+  "unstar": {
+    "message": "Unpin"
+  },
+  "pinned": {
+    "message": "Pinned"
+  },
+  "idNotFound": {
+    "message": "Message ID not determined yet. Please wait 1-2 seconds."
+  },
+  "optimizerEnabledLabel": {
+    "message": "Magic Wand (Prompt Enhancer)"
+  },
+  "optimizerLanguageLabel": {
+    "message": "Magic Wand Output Language"
+  },
+  "langTr": {
+    "message": "Turkish"
+  },
+  "langEn": {
+    "message": "English"
+  },
+  "improvePrompt": {
+    "message": "Magic Wand: Enhance Prompt"
+  },
+  "groqBoostTitle": {
+    "message": "Lightning Speed (Groq Boost)"
+  },
+  "groqBoostDesc": {
+    "message": "Speed up optimization by 10x with Groq (One-time permission required)."
+  },
+  "groqBoostBtn": {
+    "message": "Boost Now"
+  },
+  "groqBoostActive": {
+    "message": "⚡ Lightning Boost Active!"
+  },
+  "groqWait": {
+    "message": "Boosting, please wait..."
+  },
+  "groqNoKeyWarning": {
+    "message": "Please load a Groq API Key in settings!"
+  },
+  "setupGroqKey": {
+    "message": "Setup API Key"
+  },
+  "changeGroqKey": {
+    "message": "Change API Key"
+  },
+  "groqSettingsTitle": {
+    "message": "Groq API Settings"
+  },
+  "groqKeyLabel": {
+    "message": "API Key"
+  },
+  "groqKeyNote": {
+    "message": "You can get your key at console.groq.com/keys"
+  }
+}

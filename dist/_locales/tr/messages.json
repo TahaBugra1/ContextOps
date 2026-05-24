@@ -1,0 +1,156 @@
+{
+  "extensionName": {
+    "message": "ChatGPT Optimizer"
+  },
+  "extensionDescription": {
+    "message": "Uzun sohbetlerde eski mesajları render öncesi kırparak yavaşlamayı azaltır. Geliştirici: lmehmetkaraca"
+  },
+  "creatorLine": {
+    "message": "Geliştirici: Yusuf Çinar & Taha Buğra Ak"
+  },
+  "activeLabel": {
+    "message": "Aktif"
+  },
+  "enabledLabel": {
+    "message": "Açık/Kapalı"
+  },
+  "limitLabel": {
+    "message": "Mesaj Sınırı (Adet)"
+  },
+  "apply": {
+    "message": "Uygula"
+  },
+  "trimNow": {
+    "message": "Şimdi optimize et"
+  },
+  "loadOlder": {
+    "message": "Daha eskileri göster"
+  },
+  "hotReload": {
+    "message": "Hot Reload"
+  },
+  "openSettings": {
+    "message": "Ayarları aç"
+  },
+  "statusPaused": {
+    "message": "Duraklatıldı"
+  },
+  "statusKeeping": {
+    "message": "Son $1 mesaj tutuluyor",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "statusSearching": {
+    "message": "Sayfa hazırlanıyor"
+  },
+  "layoutUnsupported": {
+    "message": "Bu sayfa düzeni desteklenmiyor"
+  },
+  "activeToast": {
+    "message": "Optimizer aktif"
+  },
+  "onlyChatgptScope": {
+    "message": "Yalnızca ChatGPT sekmelerinde çalışır"
+  },
+  "openChatgptTab": {
+    "message": "Bu eklenti yalnızca ChatGPT sekmelerinde çalışır"
+  },
+  "openChatgptNow": {
+    "message": "ChatGPT Aç"
+  },
+  "settingsTitle": {
+    "message": "ChatGPT Optimizer Ayarları"
+  },
+  "autoTrimLabel": {
+    "message": "Otomatik optimize"
+  },
+  "showToolbarLabel": {
+    "message": "Sayfa içi araç çubuğunu göster"
+  },
+  "resetDefaults": {
+    "message": "Varsayılanlara dön"
+  },
+  "savedStatus": {
+    "message": "Ayarlar kaydedildi"
+  },
+  "resetDone": {
+    "message": "Varsayılanlar geri yüklendi"
+  },
+  "olderNotRecoverable": {
+    "message": "$1 eski mesaj artık geri yüklenemiyor",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "renderedLabel": {
+    "message": "gösterilen"
+  },
+  "hiddenLabel": {
+    "message": "gizlenen"
+  },
+  "star": {
+    "message": "Sabitle"
+  },
+  "unstar": {
+    "message": "Sabitlemeyi Kaldır"
+  },
+  "pinned": {
+    "message": "Sabitlendi"
+  },
+  "idNotFound": {
+    "message": "Mesaj ID'si henüz belirlenmedi. Lütfen 1-2 saniye bekleyin."
+  },
+  "optimizerEnabledLabel": {
+    "message": "Sihirli Değnek (Prompt Geliştirici)"
+  },
+  "optimizerLanguageLabel": {
+    "message": "Sihirli Değnek Çıktı Dili"
+  },
+  "langTr": {
+    "message": "Türkçe"
+  },
+  "langEn": {
+    "message": "İngilizce"
+  },
+  "improvePrompt": {
+    "message": "Sihirli Değnek: Promptu Geliştir"
+  },
+  "groqBoostTitle": {
+    "message": "Ultra Hız (Turbo Boost)"
+  },
+  "groqBoostDesc": {
+    "message": "Sunucu taraflı hızlandırma ile 10x daha hızlı sonuç alın."
+  },
+  "groqBoostBtn": {
+    "message": "Turbo'yu Aktif Et"
+  },
+  "groqBoostActive": {
+    "message": "⚡ Turbo Boost Aktif!"
+  },
+  "groqWait": {
+    "message": "Hızlandırılıyor, lütfen bekleyin..."
+  },
+  "groqNoKeyWarning": {
+    "message": "Lütfen ayarlardan Groq API Key yükleyin!"
+  },
+  "setupGroqKey": {
+    "message": "API Key Kurulumu"
+  },
+  "changeGroqKey": {
+    "message": "API Key Değiştir"
+  },
+  "groqSettingsTitle": {
+    "message": "Groq API Ayarları"
+  },
+  "groqKeyLabel": {
+    "message": "API Anahtarı (Key)"
+  },
+  "groqKeyNote": {
+    "message": "Anahtarınızı console.groq.com/keys adresinden alabilirsiniz."
+  }
+}
