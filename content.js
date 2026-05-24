@@ -428,8 +428,10 @@
       const { optimized, requestId, error } = event.data.payload || {};
       const textarea = document.getElementById('prompt-textarea');
       const btn = document.querySelector('.cgptopt-optimize-btn'); 
+      const sphere = document.querySelector('.cgptopt-main-sphere');
       
       if (btn) btn.classList.remove('loading');
+      if (sphere) sphere.classList.remove('loading');
       toggleTextareaLock(false);
       
       if (error === 'no_token') {

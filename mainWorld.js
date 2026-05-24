@@ -317,7 +317,14 @@
               if (userPrompt && convId && convId.length > 10) {
                 const relevantDocs = searchRagStore(userPrompt, convId, activeKeptIds);
                 if (relevantDocs.length > 0) {
-                  console.log(`[CGPTOpt] RAG: Injecting ${relevantDocs.length} relevant archived messages into prompt context.`);
+                  console.log(
+                    `%c[CGPTOpt - RAG] 🧠 EŞLEŞME TESPİT EDİLDİ!\n` +
+                    `%cKullanıcı Mesajı: "${userPrompt.substring(0, 80)}${userPrompt.length > 80 ? '...' : ''}"\n` +
+                    `Arşivden Geri Çağrılan İlgili Mesajlar:\n` +
+                    relevantDocs.map((d, i) => `  [Belge ${i+1}] Yazar: ${d.role === 'user' ? 'Kullanıcı' : 'Asistan'} (ID: ${d.id.substring(0,8)}...)\n   İçerik: "${d.text.substring(0, 150)}${d.text.length > 150 ? '...' : ''}"`).join('\n'),
+                    "color: #fbbf24; font-weight: bold; font-size: 13px;",
+                    "color: #a3e635; font-size: 11px;"
+                  );
                   
                   let ragContext = "";
                   if (settings.optimizerLanguage === 'tr') {
@@ -465,6 +472,13 @@ function searchRagStore(queryText, convId, currentKeptIds) {
     const queryTerms = queryTokens.filter(t => !stopWords.has(t));
     if (queryTerms.length === 0) return [];
 
+    console.log(
+      `%c[CGPTOpt - RAG Search] %cAnalyzing query terms: %o\nSearching through ${messages.length} archived messages in localStorage...`,
+      "color: #38bdf8; font-weight: bold;",
+      "color: #e2e8f0;",
+      queryTerms
+    );
+
     const scored = [];
     messages.forEach(msg => {
       // Only search in messages that are NOT in the active trimmed view (currently kept in ChatGPT DOM)
@@ -490,6 +504,19 @@ function searchRagStore(queryText, convId, currentKeptIds) {
 
     // Sort by score descending and return top K
     scored.sort((a, b) => b.score - a.score);
+    if (scored.length > 0) {
+      console.log(
+        `%c[CGPTOpt - RAG Search] %cMatches found: ${scored.length} messages. Top score: ${scored[0].score}`,
+        "color: #38bdf8; font-weight: bold;",
+        "color: #a3e635;"
+      );
+    } else {
+      console.log(
+        `%c[CGPTOpt - RAG Search] %cNo relevant past messages found for current query terms.`,
+        "color: #38bdf8; font-weight: bold;",
+        "color: #f43f5e;"
+      );
+    }
     return scored.slice(0, 2).map(item => item.msg);
   } catch (e) {
     console.error('[CGPTOpt] RAG search failed', e);
