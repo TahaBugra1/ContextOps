@@ -1,4 +1,23 @@
-﻿## [2026-05-24 17:22]
+﻿## [2026-05-24 17:24]
+
+**Request:** Hatırla (Remember) özelliğinin projeden tamamen silinmesi.
+
+**Files:**
+- content.js
+- mainWorld.js
+- ui.css
+
+**Change:**
+- content.js: injectRememberButton() tanimi, init() icindeki cagirisi ve hatirla-off event listeneri kaldirildi.
+- mainWorld.js: rememberAllActive degiskenleri, event listener'lari, ve Infinity limit mantigi tamamen temizlendi.
+- ui.css: .cgptopt-remember-btn ve bagli hover/active stilleri tamamen silindi.
+
+**Reason:** RAG hafiza altyapisi entegrasyonu sonrasinda eski hantal "Hatirla" (Tum gecmisi gonder) butonu gereksiz hale geldigi icin temizlik ve kod sadelestirilmesi yapildi.
+
+**Test Result:** passed - manual check, redundant remember codes fully cleaned and code compiles.
+
+---
+## [2026-05-24 17:22]
 
 **Request:** Yildizin metin kutusu altina yerlestirilmesi, optimize buton kilidinin giderilmesi ve RAG calismasi konsol seffaflik loglarinin eklenmesi.
 
@@ -47,6 +66,7 @@
 **Test Result:** manual check - lint clean, import successful, RAG logic and absolute CSS position verified.
 
 ---
+
 
 
 

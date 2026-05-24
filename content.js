@@ -418,12 +418,6 @@
           } 
         }, '*');
       });
-    } else if (event.data.type === 'cgptopt-remember-off') {
-      const btn = document.getElementById('cgptopt-remember-btn');
-      if (btn && btn.classList.contains('active')) {
-        btn.classList.remove('active');
-        btn.innerHTML = '🧠 Hatırla (Kapalı)';
-      }
     } else if (event.data.type === 'cgptopt-optimize-result') {
       const { optimized, requestId, error } = event.data.payload || {};
       const textarea = document.getElementById('prompt-textarea');
@@ -588,25 +582,6 @@
     });
   }
 
-  function injectRememberButton() {
-    if (!settings.enabled) return;
-    if (document.getElementById('cgptopt-remember-btn')) return;
-
-    const btn = document.createElement('button');
-    btn.id = 'cgptopt-remember-btn';
-    btn.className = 'cgptopt-remember-btn';
-    btn.innerHTML = '🧠 Hatırla (Kapalı)';
-    btn.title = 'Tıkladığınızda sonraki mesajınızda sohbetin tüm geçmişi gönderilir. (Otonom kapanır)';
-    
-    btn.onclick = () => {
-      const isActive = btn.classList.toggle('active');
-      btn.innerHTML = isActive ? '🧠 Hatırla (Açık)' : '🧠 Hatırla (Kapalı)';
-      window.postMessage({ source: 'cgpt_optimizer_content', type: 'cgptopt-set-remember', payload: isActive }, '*');
-    };
-
-    document.body.appendChild(btn);
-  }
-
   async function init() {
     try {
       const raw = await storageArea().get([CONFIG_KEY, STARRED_KEY]);
@@ -635,7 +610,6 @@
       injectStarButtons();
 
       injectSphereMenu();
-      injectRememberButton();
       
       notifyMainStatusRequest();
       if (!document.hidden) {

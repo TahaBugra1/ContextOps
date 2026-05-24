@@ -9,7 +9,6 @@
   let currentOptimizationRequestId = null;
   let lastCurrentNode = null; 
   let lastConversationId = null; // Track current conversation for worker reset
-  let rememberAllActive = false; // State for "Hatırla" toggle
  // Default fallback
   const EXTRA_KEY = 'cgpt_optimizer_extra_v1';
   const DEFAULTS = {
@@ -142,7 +141,7 @@
 
     const visibleIds = path.filter(id => isVisibleMessageNode(mapping[id]));
     const extra = parseExtra();
-    const limit = rememberAllActive ? Infinity : settings.limit + extra;
+    const limit = settings.limit + extra;
 
     const keptSet = new Set();
     // Keep root and potentially first system prompt (first 2 nodes)
@@ -375,11 +374,6 @@
 
         postStatus(trimmed.status);
 
-        if (rememberAllActive) {
-          rememberAllActive = false;
-          window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-remember-off' }, '*');
-        }
-
         const headers = new Headers(response.headers);
         headers.delete('content-length');
         headers.delete('content-encoding');
@@ -575,12 +569,7 @@ window.addEventListener('cgptopt-config', (event) => {
   postStatus({ active: Boolean(settings.enabled && settings.autoTrim) });
 });
 
-window.addEventListener('message', (event) => {
-  if (event.data && event.data.source === 'cgpt_optimizer_content' && event.data.type === 'cgptopt-set-remember') {
-    rememberAllActive = !!event.data.payload;
-    console.log('[CGPTOpt] Hatırla state set to:', rememberAllActive);
-  }
-});
+
 
 function generateUUID() {
   return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
