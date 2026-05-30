@@ -1,5 +1,5 @@
 import { pipeline, env } from '@xenova/transformers';
-import { create, insert, search, count, removeMultiple, save, load } from '@orama/orama';
+import { create, insert, search, count, removeMultiple, save, load, getByID, remove } from '@orama/orama';
 
 // Configure transformers.js
 env.allowLocalModels = false;
@@ -259,6 +259,44 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         insertionOrder = [];
         console.log('[Offscreen] Memory cleared.');
         scheduleSave(); // Persist empty state
+        sendResponse({ success: true });
+      } catch (err) {
+        sendResponse({ success: false, error: err.message });
+      }
+    })();
+    return true;
+  }
+
+  // GET_ALL_MEMORIES: return all stored memories without vectors
+  if (message.type === 'GET_ALL_MEMORIES') {
+    (async () => {
+      try {
+        await init();
+        const memories = [];
+        for (const id of insertionOrder) {
+          const doc = await getByID(db, id);
+          if (doc) {
+            memories.push({ id: doc.id, text: doc.text, timestamp: doc.timestamp });
+          }
+        }
+        // Sort by timestamp descending (newest first)
+        memories.sort((a, b) => b.timestamp - a.timestamp);
+        sendResponse({ success: true, memories });
+      } catch (err) {
+        sendResponse({ success: false, error: err.message });
+      }
+    })();
+    return true;
+  }
+
+  // DELETE_MEMORY: remove a specific memory by ID
+  if (message.type === 'DELETE_MEMORY') {
+    (async () => {
+      try {
+        await init();
+        await remove(db, message.id);
+        insertionOrder = insertionOrder.filter(id => id !== message.id);
+        scheduleSave();
         sendResponse({ success: true });
       } catch (err) {
         sendResponse({ success: false, error: err.message });

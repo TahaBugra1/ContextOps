@@ -34558,6 +34558,9 @@ function getVersion() {
 }
 //#endregion
 //#region node_modules/@orama/orama/dist/browser/methods/docs.js
+function getByID(db, id) {
+	return db.documentsStore.get(db.data.docs, id);
+}
 function count(db) {
 	return db.documentsStore.count(db.data.docs);
 }
@@ -35606,6 +35609,50 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				} });
 				insertionOrder = [];
 				console.log("[Offscreen] Memory cleared.");
+				scheduleSave();
+				sendResponse({ success: true });
+			} catch (err) {
+				sendResponse({
+					success: false,
+					error: err.message
+				});
+			}
+		})();
+		return true;
+	}
+	if (message.type === "GET_ALL_MEMORIES") {
+		(async () => {
+			try {
+				await init();
+				const memories = [];
+				for (const id of insertionOrder) {
+					const doc = await getByID(db, id);
+					if (doc) memories.push({
+						id: doc.id,
+						text: doc.text,
+						timestamp: doc.timestamp
+					});
+				}
+				memories.sort((a, b) => b.timestamp - a.timestamp);
+				sendResponse({
+					success: true,
+					memories
+				});
+			} catch (err) {
+				sendResponse({
+					success: false,
+					error: err.message
+				});
+			}
+		})();
+		return true;
+	}
+	if (message.type === "DELETE_MEMORY") {
+		(async () => {
+			try {
+				await init();
+				await remove(db, message.id);
+				insertionOrder = insertionOrder.filter((id) => id !== message.id);
 				scheduleSave();
 				sendResponse({ success: true });
 			} catch (err) {

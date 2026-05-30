@@ -38,6 +38,14 @@
 
   let visibilityToastShown = false;
   let lastToastAt = 0;
+  
+  let globalRagEnabled = true;
+  try {
+    const storedState = localStorage.getItem('cgptopt_rag_enabled');
+    if (storedState !== null) {
+      globalRagEnabled = storedState === 'true';
+    }
+  } catch(e){}
 
   function storageArea() {
     return chrome.storage.sync || chrome.storage.local;
@@ -401,6 +409,34 @@
     wrapper.appendChild(expansion);
     wrapper.appendChild(mainSphere);
 
+    // --- RAG Toggle Button ---
+    const ragToggleBtn = document.createElement('div');
+    ragToggleBtn.className = 'cgptopt-rag-toggle-btn';
+    ragToggleBtn.title = "Hafıza Bağlantısı (RAG)";
+    ragToggleBtn.innerHTML = globalRagEnabled ? `🧠` : `🔇`;
+    ragToggleBtn.classList.toggle('disabled', !globalRagEnabled);
+    
+    ragToggleBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      globalRagEnabled = !globalRagEnabled;
+      
+      try { localStorage.setItem('cgptopt_rag_enabled', globalRagEnabled); } catch(err){}
+      
+      ragToggleBtn.classList.toggle('disabled', !globalRagEnabled);
+      ragToggleBtn.innerHTML = globalRagEnabled ? `🧠` : `🔇`;
+      
+      window.postMessage({
+        source: 'cgpt_optimizer_content',
+        type: 'cgptopt-toggle-rag',
+        payload: { enabled: globalRagEnabled }
+      }, '*');
+
+      showToast(globalRagEnabled ? "Hafıza Bağlantısı Açıldı 🧠" : "Hafıza Bağlantısı Kapatıldı 🔇 (İncognito)");
+    };
+
+    wrapper.appendChild(ragToggleBtn);
+
     // No setInterval needed, position is handled natively by CSS and DOM hierarchy!
   }
 
@@ -482,7 +518,7 @@
         });
       });
     } else if (event.data.type === 'cgptopt-optimize-result') {
-      const { optimized, requestId, error } = event.data.payload || {};
+      const { optimized, requestId, error, originalText, currentLang } = event.data.payload || {};
       const textarea = document.getElementById('prompt-textarea');
       const btn = document.querySelector('.cgptopt-main-sphere') || document.querySelector('.cgptopt-optimize-btn'); 
       
@@ -497,32 +533,116 @@
       if (error && error !== 'no_token') {
         const errorMsg = typeof error === 'string' && error !== 'Optimization failed' ? error : (settings.optimizerLanguage === 'tr' ? "Hata: Prompt optimize edilemedi." : "Error: Could not optimize prompt.");
         showToast(errorMsg);
+        
+        const existingOverlay = document.getElementById('cgptopt-preview-container');
+        if (existingOverlay) existingOverlay.remove();
+        
         return;
       }
 
       if (optimized && textarea) {
-        textarea.focus();
-        document.execCommand('selectAll', false, null);
-        document.execCommand('delete', false, null);
-        document.execCommand('insertText', false, optimized);
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-        
-        showToast("Sihirli Değnek: Prompt Geliştirildi! ✨");
-        
-        // Auto-send the message after a brief delay to allow React state to settle
-        setTimeout(() => {
-          const sendBtn = document.querySelector('button[data-testid="send-button"]') || 
-                          document.querySelector('button[aria-label="Send message"]');
-          if (sendBtn && !sendBtn.disabled) {
-            const mouseOpts = { bubbles: true, cancelable: true, view: window };
-            sendBtn.dispatchEvent(new MouseEvent('mousedown', mouseOpts));
-            sendBtn.click();
-            sendBtn.dispatchEvent(new MouseEvent('mouseup', mouseOpts));
-          }
-        }, 150);
+        showPreviewBubble(optimized, textarea, originalText, currentLang);
+        showToast("Sihirli Değnek: Prompt Geliştirildi! ✨ (Önizleme)");
       }
     }
   });
+
+  function showPreviewBubble(optimizedResult, textarea, originalText, currentLang = 'en') {
+    // Determine translations object
+    let translations = optimizedResult;
+    if (typeof optimizedResult === 'string') {
+       translations = { en: optimizedResult, tr: optimizedResult };
+    }
+    
+    let currentText = translations[currentLang] || translations.en || translations.tr || "";
+
+    // Remove existing bubble if any
+    const existing = document.getElementById('cgptopt-preview-container');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'cgptopt-preview-container';
+    overlay.className = 'cgptopt-preview-overlay';
+
+    const container = document.createElement('div');
+    container.className = 'cgptopt-preview-bubble';
+
+    container.innerHTML = `
+      <div class="cgptopt-preview-header">
+        <span class="cgptopt-preview-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z"/>
+            <path d="m2 12 10-10"/>
+            <path d="m22 12-10-10"/>
+          </svg>
+          Canlı Önizleme
+        </span>
+        <div class="cgptopt-lang-toggle">
+          <button class="cgptopt-lang-btn ${currentLang === 'tr' ? 'active' : ''}" data-lang="tr">TR</button>
+          <button class="cgptopt-lang-btn ${currentLang === 'en' ? 'active' : ''}" data-lang="en">EN</button>
+        </div>
+      </div>
+      <div class="cgptopt-preview-content"></div>
+      <div class="cgptopt-preview-actions">
+        <button class="cgptopt-btn cgptopt-btn-reject" id="cgptopt-btn-cancel">
+          İptal
+        </button>
+        <button class="cgptopt-btn cgptopt-btn-accept" id="cgptopt-btn-accept">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Kabul Et
+        </button>
+      </div>
+    `;
+
+    overlay.appendChild(container);
+    document.body.appendChild(overlay);
+
+    // Securely set content
+    container.querySelector('.cgptopt-preview-content').textContent = currentText;
+
+    // Language Toggle Actions
+    container.querySelectorAll('.cgptopt-lang-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const selectedLang = btn.getAttribute('data-lang');
+        if (selectedLang === currentLang) return;
+        // Update UI state
+        container.querySelectorAll('.cgptopt-lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        currentLang = selectedLang;
+        currentText = translations[currentLang] || translations.en || "";
+        
+        // Instantly swap the text! No API calls, zero latency.
+        container.querySelector('.cgptopt-preview-content').textContent = currentText;
+      });
+    });
+
+    // Actions
+    container.querySelector('#cgptopt-btn-cancel').addEventListener('click', (e) => {
+      e.preventDefault();
+      overlay.remove();
+    });
+
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    container.querySelector('#cgptopt-btn-accept').addEventListener('click', (e) => {
+      e.preventDefault();
+      overlay.remove();
+      
+      textarea.focus();
+      document.execCommand('selectAll', false, null);
+      document.execCommand('delete', false, null);
+      document.execCommand('insertText', false, currentText);
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      // We don't auto-send anymore based on user's request:
+      // "Kabul et yazıp enter'a basma işi kullanıcıya kalsın."
+    });
+  }
 
   async function toggleStar(messageId) {
     const url = new URL(location.href);
@@ -539,6 +659,13 @@
 }
 
   function setupObserver() {
+    // Send initial RAG state to mainWorld just in case
+    window.postMessage({
+      source: 'cgpt_optimizer_content',
+      type: 'cgptopt-toggle-rag',
+      payload: { enabled: globalRagEnabled }
+    }, '*');
+
     // --- Original ChatGPT Logic ---
     const observer = new MutationObserver(() => {
       if (!isContextValid()) {

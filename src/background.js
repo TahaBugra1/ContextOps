@@ -56,7 +56,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // Listener for prompt optimization requests
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // Route AI Engine requests to offscreen document
-  if (['RAG_SEARCH', 'EMBED_AND_STORE', 'GET_STATS', 'CLEAR_MEMORY'].includes(request.type)) {
+  if (['RAG_SEARCH', 'EMBED_AND_STORE', 'GET_STATS', 'CLEAR_MEMORY', 'GET_ALL_MEMORIES', 'DELETE_MEMORY'].includes(request.type)) {
     (async () => {
       try {
         await setupOffscreenDocument(OFFSCREEN_DOCUMENT_PATH);
@@ -90,14 +90,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           const res = await handleGroqOptimization(request.payload.instruction, groqKey);
           if (res.success) {
             sendResponse(res);
-            return;
           } else {
-            groqError = res.error;
-            console.warn('[CGPTOpt-Bg] Groq API failed, falling back to UI automation:', res.error);
+            console.warn('[CGPTOpt-Bg] Groq API failed, returning error instead of fallback:', res.error);
+            sendResponse({ success: false, error: res.error });
           }
+          return;
         }
         
-        // Fallback to UI automation if no Groq, no key, or Groq failed
+        // Fallback to UI automation if no Groq key is provided
         const result = await handleOptimization(request.payload.instruction);
         sendResponse({ success: true, optimized: result });
       } catch (error) {
@@ -505,54 +505,72 @@ async function automateChatGPT(instruction) {
  * Directly hits Groq API for ultra-fast results
  */
 async function handleGroqOptimization(instruction, apiKey) {
-  const systemPrompt = `You are an expert Prompt Engineer. 
-Optimize the user's prompt using CO-STAR framework (Context, Objective, Style, Tone, Audience, Response).
-Wrap the final optimized prompt inside <FINAL_PROMPT> tags.
-Do not provide any other explanation or text outside the tags.`;
+  const modelsToTry = [
+    'llama-3.1-8b-instant',
+    'llama3-70b-8192',
+    'mixtral-8x7b-32768'
+  ];
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+  let lastError = null;
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Optimize this prompt: ${instruction}` }
-        ],
-        temperature: 0.6,
-        max_tokens: 4000
-      })
-    });
-    clearTimeout(timeoutId);
+  for (const model of modelsToTry) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error?.message || `HTTP ${response.status}`);
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: 'user', content: instruction }
+          ],
+          temperature: 0.6,
+          max_tokens: 4000
+        })
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        const errorMsg = errData.error?.message || `HTTP ${response.status}`;
+        
+        // If it's a Rate Limit (429) or internal error, save error and try next model
+        if (response.status === 429 || response.status >= 500) {
+          lastError = new Error(`[${model}] ${errorMsg}`);
+          console.warn(`[CGPTOpt-Bg] Groq Model ${model} failed, trying next...`, errorMsg);
+          continue; 
+        } else {
+          // For auth errors (401) or bad requests (400), don't retry, just throw immediately
+          throw new Error(`[${model}] ${errorMsg}`);
+        }
+      }
+
+      const data = await response.json();
+      let optimized = data.choices[0].message.content;
+
+      return { success: true, optimized };
+    } catch (err) {
+      lastError = err;
+      // Abort errors (timeouts) can also trigger a retry with the next model
+      if (err.name === 'AbortError') {
+         console.warn(`[CGPTOpt-Bg] Groq Model ${model} timed out, trying next...`);
+         continue;
+      }
+      // If it's an API Key error or something else we already threw, stop retrying
+      if (err.message.includes('401') || err.message.includes('403')) {
+         break;
+      }
+      console.warn(`[CGPTOpt-Bg] Groq Model ${model} error:`, err);
     }
-
-    const data = await response.json();
-    let optimized = data.choices[0].message.content;
-
-    // Extract content from <FINAL_PROMPT> tags if present
-    const match = optimized.match(/<FINAL_PROMPT>([\s\S]*?)<\/FINAL_PROMPT>/i);
-    if (match && match[1]) {
-      optimized = match[1].trim();
-    } else {
-      // Fallback: clean any leftover XML-like tags
-      optimized = optimized.replace(/<\/?FINAL_PROMPT>/gi, '').trim();
-    }
-
-    return { success: true, optimized };
-  } catch (err) {
-    console.error('[CGPTOpt-Bg] Groq Error:', err);
-    return { success: false, error: 'Groq API Error: ' + err.message };
   }
+
+  // If we exhausted all models or hit a fatal error
+  console.error('[CGPTOpt-Bg] All Groq models failed. Last Error:', lastError);
+  return { success: false, error: 'Groq API Error (All Models Exhausted): ' + (lastError?.message || 'Unknown') };
 }

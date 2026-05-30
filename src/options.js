@@ -158,6 +158,97 @@ async function init() {
     statusEl.textContent = t('resetDone');
     setTimeout(() => { statusEl.textContent = ''; }, 2000);
   });
+
+  // --- MEMORY EXPLORER LOGIC ---
+  const memoryListEl = document.getElementById('memory-list');
+  const refreshMemoryBtn = document.getElementById('refresh-memory');
+  const clearMemoryBtn = document.getElementById('clear-memory');
+
+  function loadMemories() {
+    memoryListEl.innerHTML = '<div class="memory-loading">Hafıza yükleniyor...</div>';
+    chrome.runtime.sendMessage({ type: 'GET_ALL_MEMORIES' }, (response) => {
+      if (chrome.runtime.lastError || !response || !response.success) {
+        memoryListEl.innerHTML = '<div class="memory-empty">Hafıza yüklenemedi veya boş.</div>';
+        return;
+      }
+      
+      const memories = response.memories || [];
+      if (memories.length === 0) {
+        memoryListEl.innerHTML = '<div class="memory-empty">Henüz hiç anı kaydedilmemiş.</div>';
+        return;
+      }
+
+      memoryListEl.innerHTML = '';
+      memories.forEach(mem => {
+        const item = document.createElement('div');
+        item.className = 'memory-item';
+        
+        const date = new Date(mem.timestamp).toLocaleString(settings.optimizerLanguage === 'tr' ? 'tr-TR' : 'en-US');
+        
+        item.innerHTML = `
+          <div class="memory-content">
+            <div class="memory-text">${escapeHtml(mem.text)}</div>
+            <div class="memory-date">${date}</div>
+          </div>
+          <button class="memory-delete-btn" title="Sil" data-id="${mem.id}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+          </button>
+        `;
+        
+        item.querySelector('.memory-delete-btn').addEventListener('click', () => {
+          deleteMemory(mem.id, item);
+        });
+        
+        memoryListEl.appendChild(item);
+      });
+    });
+  }
+
+  function deleteMemory(id, itemElement) {
+    itemElement.style.opacity = '0.5';
+    itemElement.style.pointerEvents = 'none';
+    chrome.runtime.sendMessage({ type: 'DELETE_MEMORY', id }, (res) => {
+      if (res && res.success) {
+        itemElement.remove();
+        if (memoryListEl.children.length === 0) {
+          memoryListEl.innerHTML = '<div class="memory-empty">Henüz hiç anı kaydedilmemiş.</div>';
+        }
+      } else {
+        itemElement.style.opacity = '1';
+        itemElement.style.pointerEvents = 'auto';
+        alert("Silinirken hata oluştu.");
+      }
+    });
+  }
+
+  function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+  }
+
+  if (refreshMemoryBtn) {
+    refreshMemoryBtn.addEventListener('click', loadMemories);
+  }
+
+  if (clearMemoryBtn) {
+    clearMemoryBtn.addEventListener('click', () => {
+      if (confirm(settings.optimizerLanguage === 'tr' ? "Tüm yapay zeka hafızası (RAG veritabanı) kalıcı olarak silinecek. Emin misiniz?" : "All AI memory (RAG database) will be permanently deleted. Are you sure?")) {
+        chrome.runtime.sendMessage({ type: 'CLEAR_MEMORY' }, () => {
+          loadMemories();
+          alert(settings.optimizerLanguage === 'tr' ? "Hafıza tamamen temizlendi!" : "Memory fully cleared!");
+        });
+      }
+    });
+  }
+
+  // Initial load
+  if (memoryListEl) {
+    loadMemories();
+  }
 }
 
 init();

@@ -166,3 +166,125 @@ input[type="password"] {
   border-color: #cbd5e1;
   transform: translateY(-2px);
 }
+/* Memory Explorer Styles */
+.memory-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
+}
+
+.memory-list::-webkit-scrollbar {
+  width: 6px;
+}
+.memory-list::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 6px;
+}
+
+.memory-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.memory-item:hover {
+  border-color: #818cf8;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+.memory-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.memory-text {
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.memory-date {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.memory-delete-btn {
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.memory-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+.memory-empty {
+  color: #94a3b8;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+}
+
+.secondary-btn {
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.secondary-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.danger-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.danger-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
