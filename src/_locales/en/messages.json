@@ -106,10 +106,10 @@
     "message": "Message ID not determined yet. Please wait 1-2 seconds."
   },
   "optimizerEnabledLabel": {
-    "message": "Magic Wand (Prompt Enhancer)"
+    "message": "Magic Star (Prompt Enhancer)"
   },
   "optimizerLanguageLabel": {
-    "message": "Magic Wand Output Language"
+    "message": "Magic Star Output Language"
   },
   "langTr": {
     "message": "Turkish"
@@ -118,7 +118,7 @@
     "message": "English"
   },
   "improvePrompt": {
-    "message": "Magic Wand: Enhance Prompt"
+    "message": "Magic Star: Enhance Prompt"
   },
   "groqBoostTitle": {
     "message": "Lightning Speed (Groq Boost)"
@@ -152,5 +152,65 @@
   },
   "groqKeyNote": {
     "message": "You can get your key at console.groq.com/keys"
+  },
+  "promptStylesTitle": {
+    "message": "Prompt Methods (Max 5)"
+  },
+  "customCommandsTitle": {
+    "message": "Custom Templates 🪄"
+  },
+  "customCommandsMaxBadge": {
+    "message": "Max 3"
+  },
+  "customCommandsDesc": {
+    "message": "Create your own commands (e.g. /seo) and AI instructions to add to the magic menu."
+  },
+  "ccIconPlaceholder": {
+    "message": "Icon (e.g. 🚀)"
+  },
+  "ccIdPlaceholder": {
+    "message": "Cmd (e.g. /seo)"
+  },
+  "ccNamePlaceholder": {
+    "message": "Title (e.g. SEO Expert)"
+  },
+  "ccInstructionPlaceholder": {
+    "message": "AI instruction (e.g. Act as an expert in SEO...)"
+  },
+  "ccIconSelect": {
+    "message": "Icon"
+  },
+  "ccAddBtn": {
+    "message": "+ Add New Template"
+  },
+  "ccMaxReached": {
+    "message": "Maximum (3) limit reached"
+  },
+  "ccAlertFill": {
+    "message": "Please fill in command, title, and instruction fields."
+  },
+  "ccAlertFormat": {
+    "message": "Command must be in valid format (e.g. /seo)"
+  },
+  "ccAlertExists": {
+    "message": "This command name already exists..."
+  },
+  "ccDeleteBtn": {
+    "message": "Delete"
+  },
+  "memoryPanelTitle": {
+    "message": "Memory Explorer 🧠"
+  },
+  "memoryPanelDesc": {
+    "message": "All memories the AI remembers about you in its RAG database are below. You can delete unwanted memories."
+  },
+  "memoryLoading": {
+    "message": "Loading memory..."
+  },
+  "memoryRefreshBtn": {
+    "message": "Refresh"
+  },
+  "memoryClearBtn": {
+    "message": "Clear All Memory"
   }
 }

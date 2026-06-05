@@ -26,6 +26,8 @@
       <input id="limit" type="number" min="1" max="200" step="1">
     </label>
 
+    <label class="row switch-row">
+      <span data-i18n="autoTrimLabel"></span>
       <input id="autoTrim" type="checkbox">
     </label>
 
@@ -52,6 +54,32 @@
     </div>
 
     <div class="row-group">
+      <h2 style="display: flex; align-items: center; justify-content: space-between;">
+        <span data-i18n="customCommandsTitle"></span>
+        <span class="badge" data-i18n="customCommandsMaxBadge" style="font-size: 11px; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; font-weight: 500;"></span>
+      </h2>
+      <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px; margin-top: 0;" data-i18n="customCommandsDesc">
+      </p>
+      
+      <div id="custom-commands-list" class="custom-commands-list">
+        <!-- JS will populate custom commands here -->
+      </div>
+
+      <div class="custom-command-form" id="custom-command-form">
+        <div style="display:flex; gap:10px; margin-bottom: 10px; position: relative;">
+          <div class="emoji-picker-container">
+            <button type="button" id="cc-icon-btn" class="emoji-picker-btn empty" title="İkon Seç" data-selected-icon="">+</button>
+            <div id="emoji-picker-popup" class="emoji-picker-popup hidden"></div>
+          </div>
+          <input type="text" id="cc-id" style="flex: 1;" data-i18n-placeholder="ccIdPlaceholder">
+          <input type="text" id="cc-name" style="flex: 1.5;" data-i18n-placeholder="ccNamePlaceholder">
+        </div>
+        <textarea id="cc-instruction" rows="3" data-i18n-placeholder="ccInstructionPlaceholder"></textarea>
+        <button id="cc-add-btn" type="button" class="secondary-btn" style="margin-top: 8px;" data-i18n="ccAddBtn"></button>
+      </div>
+    </div>
+
+    <div class="row-group">
       <h2 data-i18n="promptStylesTitle">Prompt Yöntemleri (Maks 5)</h2>
       <div id="styles-grid" class="styles-grid">
         <!-- JS will populate here -->
@@ -59,16 +87,15 @@
     </div>
 
     <div class="row-group">
-      <h2>Hafıza Yönetim Paneli (Memory Explorer) 🧠</h2>
-      <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px; margin-top: 0;">
-        Yapay zekanın RAG veritabanında sizin hakkınızda hatırladığı tüm anılar aşağıdadır. İstemediğiniz anıları silebilirsiniz.
+      <h2 data-i18n="memoryPanelTitle"></h2>
+      <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px; margin-top: 0;" data-i18n="memoryPanelDesc">
       </p>
       <div id="memory-list" class="memory-list">
-        <div class="memory-loading">Hafıza yükleniyor...</div>
+        <div class="memory-loading" data-i18n="memoryLoading"></div>
       </div>
       <div style="display: flex; gap: 10px; margin-top: 12px;">
-        <button id="refresh-memory" type="button" class="secondary-btn">Yenile</button>
-        <button id="clear-memory" type="button" class="danger-btn">Tüm Hafızayı Sil</button>
+        <button id="refresh-memory" type="button" class="secondary-btn" data-i18n="memoryRefreshBtn"></button>
+        <button id="clear-memory" type="button" class="danger-btn" data-i18n="memoryClearBtn"></button>
       </div>
     </div>
 

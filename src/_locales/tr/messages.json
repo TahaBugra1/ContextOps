@@ -106,10 +106,10 @@
     "message": "Mesaj ID'si henüz belirlenmedi. Lütfen 1-2 saniye bekleyin."
   },
   "optimizerEnabledLabel": {
-    "message": "Sihirli Değnek (Prompt Geliştirici)"
+    "message": "Sihirli Yıldız (Prompt Geliştirici)"
   },
   "optimizerLanguageLabel": {
-    "message": "Sihirli Değnek Çıktı Dili"
+    "message": "Sihirli Yıldız Çıktı Dili"
   },
   "langTr": {
     "message": "Türkçe"
@@ -118,7 +118,7 @@
     "message": "İngilizce"
   },
   "improvePrompt": {
-    "message": "Sihirli Değnek: Promptu Geliştir"
+    "message": "Sihirli Yıldız: Promptu Geliştir"
   },
   "groqBoostTitle": {
     "message": "Ultra Hız (Turbo Boost)"
@@ -152,5 +152,65 @@
   },
   "groqKeyNote": {
     "message": "Anahtarınızı console.groq.com/keys adresinden alabilirsiniz."
+  },
+  "promptStylesTitle": {
+    "message": "Prompt Yöntemleri (Maks 5)"
+  },
+  "customCommandsTitle": {
+    "message": "Kişisel Şablonlar 🪄"
+  },
+  "customCommandsMaxBadge": {
+    "message": "Maks 3"
+  },
+  "customCommandsDesc": {
+    "message": "Kendi komutlarınızı (Örn: /seo) ve yapay zeka talimatlarınızı oluşturarak sihirli menüye ekleyin."
+  },
+  "ccIconPlaceholder": {
+    "message": "İkon (Örn: 🚀)"
+  },
+  "ccIdPlaceholder": {
+    "message": "Komut (Örn: /seo)"
+  },
+  "ccNamePlaceholder": {
+    "message": "Başlık (Örn: SEO Uzmanı)"
+  },
+  "ccInstructionPlaceholder": {
+    "message": "Yapay zeka için talimat (Örn: Act as an SEO expert...)"
+  },
+  "ccIconSelect": {
+    "message": "İkon"
+  },
+  "ccAddBtn": {
+    "message": "+ Yeni Şablon Ekle"
+  },
+  "ccMaxReached": {
+    "message": "Maksimum (3) sınıra ulaştınız"
+  },
+  "ccAlertFill": {
+    "message": "Lütfen komut, başlık ve talimat alanlarını doldurun."
+  },
+  "ccAlertFormat": {
+    "message": "Komut geçerli formatta olmalı (Örn: /seo)"
+  },
+  "ccAlertExists": {
+    "message": "Bu komut ismi zaten sistemde mevcut..."
+  },
+  "ccDeleteBtn": {
+    "message": "Sil"
+  },
+  "memoryPanelTitle": {
+    "message": "Hafıza Yönetim Paneli 🧠"
+  },
+  "memoryPanelDesc": {
+    "message": "Yapay zekanın RAG veritabanında sizin hakkınızda hatırladığı tüm anılar aşağıdadır. İstemediğiniz anıları silebilirsiniz."
+  },
+  "memoryLoading": {
+    "message": "Hafıza yükleniyor..."
+  },
+  "memoryRefreshBtn": {
+    "message": "Yenile"
+  },
+  "memoryClearBtn": {
+    "message": "Tüm Hafızayı Sil"
   }
 }

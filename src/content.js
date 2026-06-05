@@ -15,7 +15,8 @@
     optimizerEnabled: true,
     optimizerLanguage: 'en',
     groq_key: '',
-    selectedStyles: ['/spec', '/cot', '/feynman', '/socratic', '/step']
+    selectedStyles: ['/spec', '/cot', '/feynman', '/socratic', '/step'],
+    customCommands: []
   };
 
   const CONFIG_KEY = 'cgpt_optimizer_config_v1';
@@ -79,6 +80,7 @@
       optimizerLanguage: (raw.optimizerLanguage === 'en' || raw.optimizerLanguage === 'tr') ? raw.optimizerLanguage : DEFAULTS.optimizerLanguage,
       groq_key: typeof raw.groq_key === 'string' ? raw.groq_key : (settings.groq_key || DEFAULTS.groq_key),
       selectedStyles: Array.isArray(raw.selectedStyles) ? raw.selectedStyles : DEFAULTS.selectedStyles,
+      customCommands: Array.isArray(raw.customCommands) ? raw.customCommands : DEFAULTS.customCommands,
       starredIds: Array.isArray(raw.starredIds) ? raw.starredIds : (Array.isArray(starredIds) ? starredIds : [])
     };
   }
@@ -291,11 +293,21 @@
       ? settings.selectedStyles.slice(0, 5)
       : ['/image', '/makale', '/spec', '/summary', '/mail'];
 
-    const items = selectedIds.map(id => ({
-      id: id,
-      icon: PROMPT_STYLES[id] ? PROMPT_STYLES[id].icon : '✨',
-      label: PROMPT_STYLES[id] ? PROMPT_STYLES[id].label : id
-    }));
+    const customCmds = settings.customCommands || [];
+    const currentLang = settings.optimizerLanguage || 'en';
+
+    const items = selectedIds.map(id => {
+      const custom = customCmds.find(c => c.id === id);
+      if (custom) {
+        const customLabel = typeof custom.name === 'object' ? (custom.name[currentLang] || custom.name.en) : (custom.name || id);
+        return { id, icon: custom.icon || '🪄', label: customLabel };
+      }
+      return {
+        id,
+        icon: PROMPT_STYLES[id] ? PROMPT_STYLES[id].icon : '✨',
+        label: PROMPT_STYLES[id] ? PROMPT_STYLES[id].label : id
+      };
+    });
 
     const svgNS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNS, 'svg');
@@ -460,7 +472,7 @@
       }
       chrome.runtime.sendMessage({ 
         type: 'OPTIMIZE_PROMPT_BACKGROUND', 
-        payload: { instruction, useGroq } 
+        payload: { instruction, useGroq: !!settings.groq_key } 
       }, (response) => {
         if (chrome.runtime.lastError) {
           console.warn('[CGPTOpt] Extension context invalidated or port closed. Please refresh the page.', chrome.runtime.lastError.message);
@@ -798,6 +810,7 @@
         if (changes[CONFIG_KEY]) {
           settings = sanitize(changes[CONFIG_KEY].newValue || DEFAULTS);
           dispatchConfig();
+          injectSphereMenu();
         }
         if (changes[STARRED_KEY]) {
           starredIds = Array.isArray(changes[STARRED_KEY].newValue) ? changes[STARRED_KEY].newValue : [];

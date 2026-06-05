@@ -6,7 +6,9 @@ const DEFAULTS = {
   showToolbar: false,
   optimizerEnabled: true,
   optimizerLanguage: 'en',
-  groq_key: null
+  groq_key: null,
+  selectedStyles: ['/image', '/makale', '/spec', '/summary', '/mail'],
+  customCommands: []
 };
 
 const LIMIT_MIN = 1;
@@ -16,7 +18,24 @@ function storageArea() {
   return chrome.storage.sync || chrome.storage.local;
 }
 
+let customTranslations = null;
+
+async function loadTranslations(lang) {
+  try {
+    const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
+    const res = await fetch(url);
+    customTranslations = await res.json();
+  } catch (e) {
+    console.error("Translation load failed", e);
+  }
+}
+
 function t(key, substitutions) {
+  if (customTranslations && customTranslations[key]) {
+    let msg = customTranslations[key].message;
+    if (substitutions) msg = msg.replace('$1', substitutions[0] || substitutions);
+    return msg;
+  }
   return chrome.i18n.getMessage(key, substitutions) || key;
 }
 
@@ -33,7 +52,10 @@ function sanitize(raw) {
     showToolbar: typeof raw.showToolbar === 'boolean' ? raw.showToolbar : DEFAULTS.showToolbar,
     optimizerEnabled: typeof raw.optimizerEnabled === 'boolean' ? raw.optimizerEnabled : DEFAULTS.optimizerEnabled,
     optimizerLanguage: (raw.optimizerLanguage === 'en' || raw.optimizerLanguage === 'tr') ? raw.optimizerLanguage : DEFAULTS.optimizerLanguage,
-    groq_key: typeof raw.groq_key === 'string' ? raw.groq_key : DEFAULTS.groq_key
+    groq_key: typeof raw.groq_key === 'string' ? raw.groq_key : DEFAULTS.groq_key,
+    selectedStyles: Array.isArray(raw.selectedStyles) ? raw.selectedStyles : DEFAULTS.selectedStyles,
+    customCommands: Array.isArray(raw.customCommands) ? raw.customCommands : DEFAULTS.customCommands,
+    starredIds: Array.isArray(raw.starredIds) ? raw.starredIds : []
   };
 }
 
@@ -77,6 +99,12 @@ function applyI18n() {
     const key = el.getAttribute('data-i18n');
     el.textContent = t(key);
   });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (el.placeholder !== undefined) {
+      el.placeholder = t(key);
+    }
+  });
 }
 
 function renderStatus(statusEl, debugEl, settings, runtime) {
@@ -114,8 +142,6 @@ function renderStatus(statusEl, debugEl, settings, runtime) {
 }
 
 async function init() {
-  applyI18n();
-
   const popupRoot = document.getElementById('popupRoot');
   const blockedBanner = document.getElementById('blockedBanner');
   const openChatgptEl = document.getElementById('openChatgpt');
@@ -136,6 +162,9 @@ async function init() {
   const store = storageArea();
   const CONFIG_KEY = 'cgpt_optimizer_config_v1';
   let settings = sanitize((await store.get(CONFIG_KEY))[CONFIG_KEY] || DEFAULTS);
+
+  await loadTranslations(settings.optimizerLanguage);
+  applyI18n();
 
   // Settings buttons should ALWAYS work
   if (openOptionsEl) {

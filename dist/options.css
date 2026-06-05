@@ -105,11 +105,146 @@ button {
   margin-bottom: 12px;
 }
 
-input[type="password"] {
+input[type="password"],
+input[type="text"],
+textarea {
   flex: 1;
   border-radius: 10px;
   border: 1px solid #ced6e0;
   padding: 7px 9px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+textarea {
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.custom-commands-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cc-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+/* Emoji Picker Styles */
+.emoji-picker-container {
+  position: relative;
+  width: 38px;
+}
+
+.emoji-picker-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #ced6e0;
+  background: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.emoji-picker-btn.empty {
+  border: 1px dashed #94a3b8;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.emoji-picker-btn:hover {
+  border-color: #64748b;
+  background: #f8fafc;
+}
+
+.emoji-picker-popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 10px;
+  width: 260px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  z-index: 100;
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.2s ease;
+}
+
+.emoji-picker-popup.hidden {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.emoji-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.1s;
+}
+
+.emoji-item:hover {
+  background: #f1f5f9;
+}
+
+.cc-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cc-icon {
+  font-size: 16px;
+}
+
+.cc-id {
+  font-family: monospace;
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.cc-name {
+  font-weight: 500;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.custom-command-form {
+  background: white;
+  border: 1px dashed #cbd5e1;
+  padding: 12px;
+  border-radius: 10px;
 }
 
 .styles-grid {
@@ -165,6 +300,21 @@ input[type="password"] {
 .style-card:hover {
   border-color: #cbd5e1;
   transform: translateY(-2px);
+}
+
+.custom-style-item .style-card {
+  border: 1px dashed #fbbf24;
+  background: #fffbeb;
+}
+
+.custom-style-item input:checked + .style-card {
+  border: 1px solid #f59e0b;
+  background: #fef3c7;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.custom-style-item input:checked + .style-card .style-name {
+  color: #b45309;
 }
 /* Memory Explorer Styles */
 .memory-list {
