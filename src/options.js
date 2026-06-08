@@ -510,4 +510,10 @@ async function init() {
   }
 }
 
-init();
+if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+  window.sanitize = sanitize;
+  window.clamp = clamp;
+  window.initOptions = init;
+} else {
+  document.addEventListener('DOMContentLoaded', init);
+}
