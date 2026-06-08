@@ -1278,4 +1278,5 @@ postStatus({});
 setTimeout(() => {
   window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-warmup-worker' }, '*');
 }, 2000);
-}) ();
+export { wrapPromptWithRAGAsync, tagMessages, stripRAGFromObject, normalizeText, generateUUID };
+})();
