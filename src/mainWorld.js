@@ -1271,6 +1271,9 @@ window.addEventListener('message', (event) => {
   }
 });
 
+if (typeof window !== 'undefined' && typeof window.fetch !== 'function') {
+  window.fetch = () => Promise.resolve({ json: () => ({}) });
+}
 patchFetch();
 postStatus({});
 
@@ -1282,4 +1285,4 @@ postStatus({});
   window.normalizeText = normalizeText;
   window.generateUUID = generateUUID;
 })();
-export { wrapPromptWithRAGAsync, tagMessages, stripRAGFromObject, normalizeText, generateUUID };
+
