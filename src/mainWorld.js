@@ -1275,8 +1275,11 @@ patchFetch();
 postStatus({});
 
 // Initial Warmup with delay to ensure listeners are ready
-setTimeout(() => {
-  window.postMessage({ source: 'cgpt_optimizer_main', type: 'cgptopt-warmup-worker' }, '*');
-}, 2000);
+  // expose utilities for testing
+  window.wrapPromptWithRAGAsync = wrapPromptWithRAGAsync;
+  window.tagMessages = tagMessages;
+  window.stripRAGFromObject = stripRAGFromObject;
+  window.normalizeText = normalizeText;
+  window.generateUUID = generateUUID;
 })();
 export { wrapPromptWithRAGAsync, tagMessages, stripRAGFromObject, normalizeText, generateUUID };
