@@ -309,4 +309,11 @@ async function init() {
   }
 }
 
-init();
+if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+  window.sanitizePopup = sanitize;
+  window.clampPopup = clamp;
+  window.isSupportedUrl = isSupportedUrl;
+  window.initPopup = init;
+} else {
+  document.addEventListener('DOMContentLoaded', init);
+}

@@ -33,6 +33,12 @@ const chrome = {
         if (typeof callback === 'function') callback();
         return Promise.resolve();
       }
+    },
+    onChanged: {
+      listeners: [],
+      addListener: function(fn) { this.listeners.push(fn); },
+      trigger: function(changes, areaName) { this.listeners.forEach(fn => fn(changes, areaName)); },
+      clear: function() { this.listeners = []; }
     }
   },
   runtime: {

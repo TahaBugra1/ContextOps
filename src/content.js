@@ -836,5 +836,11 @@
     }
   }
 
-  init();
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+    window.initContent = init;
+    window.sanitizeContent = sanitize;
+    window.clampContent = clamp;
+  } else {
+    init();
+  }
 })();
