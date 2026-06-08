@@ -555,8 +555,8 @@ ${userText}`;
     window.fetch = async (...args) => {
       const input = args[0];
       const init = args[1] || {};
-      const url = input instanceof Request ? input.url : String(input);
-      const method = (init.method || (input instanceof Request ? input.method : 'GET') || 'GET').toUpperCase();
+      const url = (typeof Request !== 'undefined' && input instanceof Request) ? input.url : String(input);
+      const method = (init.method || ((typeof Request !== 'undefined' && input instanceof Request) ? input.method : 'GET') || 'GET').toUpperCase();
 
       // DEBUG: console.log('[CGPTOpt] Fetching:', url, method);
 
@@ -569,7 +569,7 @@ ${userText}`;
           hObj = new Headers(init.headers);
           currentAuth = hObj.get('Authorization') || hObj.get('X-Authorization');
         }
-        if (!currentAuth && input instanceof Request) {
+        if (!currentAuth && typeof Request !== 'undefined' && input instanceof Request) {
           hObj = input.headers;
           currentAuth = hObj.get('Authorization') || hObj.get('X-Authorization');
         }
@@ -602,7 +602,7 @@ ${userText}`;
           const h = new Headers(init.headers);
           auth = h.get('Authorization') || h.get('X-Authorization');
         }
-        if (!auth && input instanceof Request) {
+        if (!auth && typeof Request !== 'undefined' && input instanceof Request) {
           auth = input.headers.get('Authorization') || input.headers.get('X-Authorization');
         }
 
@@ -1285,5 +1285,9 @@ postStatus({});
   window.normalizeText = normalizeText;
   window.generateUUID = generateUUID;
   window.__setCurrentMapping = (mapping) => { currentMapping = mapping; };
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+    window.patchFetch = patchFetch;
+    window.wrapPromptWithRAGAsync = wrapPromptWithRAGAsync;
+  }
 })();
 
