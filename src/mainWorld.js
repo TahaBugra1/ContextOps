@@ -1284,5 +1284,6 @@ postStatus({});
   window.stripRAGFromObject = stripRAGFromObject;
   window.normalizeText = normalizeText;
   window.generateUUID = generateUUID;
+  window.__setCurrentMapping = (mapping) => { currentMapping = mapping; };
 })();
 
