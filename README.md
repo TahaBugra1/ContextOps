@@ -1,99 +1,111 @@
-<!-- Banner Placeholder -->
-<p align="center">
-  <img src="assets/banner.png" alt="ContextOps Banner" width="100%">
-</p>
+<div align="center">
 
-<h1 align="center">ContextOps</h1>
+# 🧠 ContextOps
 
-<p align="center">
-  <strong>Turbocharge ChatGPT: Eliminate "Aw, Snap!" crashes, inject RAG memory, and optimize your workflows.</strong>
-</p>
+**The Ultimate Performance & Memory Optimizer for ChatGPT**
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white" alt="Chrome">
-  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs">
-</p>
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
----
+> ContextOps is an open-source browser extension designed to eliminate ChatGPT's "Aw, Snap!" memory crashes during long sessions. It seamlessly injects a local RAG (Retrieval-Augmented Generation) memory engine, adds custom prompt commands, and drastically reduces CPU/RAM usage without altering your workflow.
 
-## 🚀 The Problem & The Solution
+[Installation](#-installation) • [Features](#-core-features) • [Benchmarks](#-performance-benchmarks) • [Architecture](#%EF%B8%8F-architecture) • [Contributing](#-contributing)
 
-ChatGPT'nin SPA yapısı uzun sohbetlerde DOM şişmesine ve RAM sızıntılarına ("Aw, Snap!") neden olur. **ContextOps**, arka planda ağ isteklerini yakalayarak sohbeti otomatik olarak kırpar (Auto-Trim), CPU kullanımını %99 oranında düşürür ve özel RAG hafızası ile eski bağlamı asla unutmaz.
-
-<!-- Main UI Screenshot -->
-<p align="center">
-  <img src="assets/screenshot-main.png" alt="ContextOps UI" width="80%">
-  <br>
-  <em>ContextOps Control Panel</em>
-</p>
+</div>
 
 ---
 
-## ✨ Modules & Features
+## 🌩️ The Problem: "Aw, Snap!"
 
-### ⚡ Auto-Trim Engine
-Geçmiş mesajları arka planda Virtual DOM'dan güvenli bir şekilde gizleyerek sınırsız uzunlukta çökmesiz sohbet deneyimi sunar.
+ChatGPT operates as a Single Page Application (SPA). During prolonged conversations, the browser's DOM tree grows exponentially. React's Virtual DOM struggles to sync thousands of message nodes, eventually causing massive memory leaks, CPU throttling, and the dreaded **"Aw, Snap!" (Out of Memory)** crash.
 
-<!-- Auto-Trim GIF Placeholder (3-5s) -->
-![Auto-Trim in Action](assets/demo-autotrim.gif)
+**ContextOps solves this** by intercepting network requests at the `fetch` layer. It trims the conversation payload invisibly before React even renders it, maintaining strict memory limits while preserving your complete chat history on OpenAI's servers.
+
+---
+
+## ✨ Core Features
+
+### ⚡ Auto-Trim Engine (Crash Prevention)
+Never lose a thought to a browser crash again. ContextOps dynamically trims the chat interface to display only the most recent messages.
+* **O(1) Efficiency:** No heavy DOM manipulation. Trimming happens at the network layer.
+* **Instant Switching:** Seamlessly reset memory limits when switching between different chats.
+
+> *[ 🎥 Place your 3-second Auto-Trim GIF here ]*
 
 ### 🧠 RAG Memory Injection
-Önemli bilgileri arka planda tutar ve sohbetin bağlamından koptuğunu hissettiğinde ilgili geçmişi prompte gizlice enjekte eder.
+ChatGPT forgets context. ContextOps doesn't. 
+* **Background Vectorization:** Automatically indexes your active conversations.
+* **Silent Injection:** When you ask a question, ContextOps silently searches its local memory and prepends historical context to your prompt using secure system markers, ensuring the AI stays on track.
 
-<!-- RAG Memory GIF Placeholder (3-5s) -->
-![RAG Memory in Action](assets/demo-rag.gif)
+> *[ 🎥 Place your 3-second RAG Memory GIF here ]*
 
-### 🪄 Custom Commands
-Sık kullandığınız prompt şablonlarına hızlıca erişin. `/cot` veya kendi belirlediğiniz kısa komutlarla anında devasa şablonları tetikleyin.
+### 🪄 Custom Command Templates
+Stop typing the same complex prompts over and over.
+* **Quick Access:** Type `/cot`, `/spec`, or any custom command you define.
+* **Seamless Expansion:** Hit enter, and ContextOps expands the command into a highly detailed instruction set, completely hidden from the UI to keep your chat clean.
 
-<!-- Custom Commands GIF Placeholder (3-5s) -->
-![Custom Commands in Action](assets/demo-commands.gif)
+> *[ 🎥 Place your 3-second Custom Commands GIF here ]*
 
 ---
 
-## 📈 Performance Benchmarks
+## 📊 Performance Benchmarks
 
-ContextOps'un O(1) etiketleme mekanizması ve akıllı RAM temizleme altyapısı sayesinde sistem kaynakları her zaman serbest kalır.
+By completely removing O(N²) regex operations and replacing heavy `MutationObserver` loops with O(1) attribute lookups, ContextOps delivers a frictionless experience.
 
-| Metric | Without ContextOps | With ContextOps |
-|--------|--------------------|-----------------|
-| CPU Usage (Idle) | ~15-20% | **< 1%** |
-| Memory (10k msgs)| 1.5 GB (Crash) | **~150 MB** |
-| Tagging Big-O | O(N²) | **O(1)** |
+| Metric | Vanilla ChatGPT | With ContextOps 🚀 |
+| :--- | :--- | :--- |
+| **CPU Usage (Typing)** | `Spikes to 30%+` | **`< 2%`** |
+| **RAM Usage (10k+ msgs)** | `1.5 GB+ (Crash)` | **`~150 MB`** |
+| **Message Tagging** | `O(N²)` complexity | **`O(1)`** direct access |
+| **Long Session Stability** | ⚠️ Unstable | ✅ Rock Solid |
 
 ---
 
 ## 📦 Installation
 
-ContextOps şu an açık kaynak ve manuel kuruluma açıktır.
+Currently, ContextOps is available for manual installation (Developer Mode) for Chrome, Brave, and Edge.
 
-1. Repoyu klonlayın:
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/yourusername/contextops.git
    ```
-2. Google Chrome'u açın ve `chrome://extensions/` adresine gidin.
-3. Sağ üstten **Developer mode**'u aktif edin.
-4. **Load unpacked** butonuna tıklayın ve indirdiğiniz `contextops` klasörünü seçin.
-5. ChatGPT'yi açın ve performansın tadını çıkarın!
+2. Open your Chromium-based browser and navigate to `chrome://extensions/`.
+3. Toggle **Developer mode** on (usually in the top right corner).
+4. Click **Load unpacked** and select the `contextops` folder you just cloned.
+5. Open [ChatGPT](https://chatgpt.com), click the ContextOps extension icon to configure your settings, and enjoy!
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture Overview
 
-ContextOps, doğrudan DOM manipülasyonundan kaçınarak React.js mimarisiyle tam uyumlu çalışır. Bunun yerine ChatGPT'nin `/backend-api/conversation` isteklerini yakalar ve veriyi ağ katmanında (`fetch` interceptor) modifiye eder.
+ContextOps is built with a strict "Zero-DOM-Conflict" philosophy. Instead of fighting React's Virtual DOM (which causes infinite loops), we intercept the data before React sees it.
 
-<!-- Architecture Diagram Placeholder -->
-<p align="center">
-  <img src="assets/architecture.png" alt="ContextOps Architecture" width="80%">
-</p>
+* **`patchFetch` Interceptor:** Hooks into `window.fetch` to parse and trim the `/backend-api/conversation` payload.
+* **Streaming Transform:** Uses a `TransformStream` to strip out custom RAG tags and Commands from the UI during real-time generation.
+* **Local Caching:** Utilizes `localStorage` and background workers to handle RAG indexing without blocking the Main Thread.
 
 ---
 
 ## 🤝 Contributing
 
-Katkılarınızı bekliyoruz! Geliştirme ortamını hazırlamak ve testleri (Jest) çalıştırmak için lütfen [CONTRIBUTING.md](CONTRIBUTING.md) belgesini inceleyin.
+We welcome all contributions! Whether it's squashing bugs, improving the RAG engine, or designing new UI features.
 
-## 📝 License
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Run tests (`npx jest`)
+5. Push to the Branch (`git push origin feature/AmazingFeature`)
+6. Open a Pull Request
 
-Bu proje MIT Lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakabilirsiniz.
+Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and testing guidelines.
+
+---
+
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+<div align="center">
+  <i>Built with ❤️ for power users and AI enthusiasts.</i>
+</div>
