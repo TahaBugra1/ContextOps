@@ -1,95 +1,89 @@
 <div align="center">
 
-# 🧠 ContextOps
+# 🧠 ContextOps (ChatGPT Optimizer)
 
-**The Ultimate Performance & Memory Optimizer for ChatGPT**
+**The Ultimate Productivity & Performance Extension for ChatGPT**
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
-> ContextOps is an open-source browser extension designed to eliminate ChatGPT's "Aw, Snap!" memory crashes during long sessions. It seamlessly injects a local RAG (Retrieval-Augmented Generation) memory engine, adds custom prompt commands, and drastically reduces CPU/RAM usage without altering your workflow.
+> ContextOps is an open-source Chrome MV3 extension designed to keep ChatGPT lightning-fast during long conversations. By intelligently trimming chat history before it renders, injecting a local RAG (Retrieval-Augmented Generation) memory engine, and providing quick custom commands, ContextOps supercharges your AI workflow.
 
-[Installation](#-installation) • [Features](#-core-features) • [Benchmarks](#-performance-benchmarks) • [Architecture](#%EF%B8%8F-architecture) • [Contributing](#-contributing)
+[Installation](#-installation) • [Features](#-core-features) • [Privacy](#-privacy) • [Contributing](#-contributing)
 
 </div>
 
 ---
 
-## 🌩️ The Problem: "Aw, Snap!"
+## 🚀 The Problem & The Solution
 
-ChatGPT operates as a Single Page Application (SPA). During prolonged conversations, the browser's DOM tree grows exponentially. React's Virtual DOM struggles to sync thousands of message nodes, eventually causing massive memory leaks, CPU throttling, and the dreaded **"Aw, Snap!" (Out of Memory)** crash.
+When having long, deep conversations with ChatGPT, the browser interface can become extremely sluggish and unresponsive due to the massive amount of DOM elements being rendered.
 
-**ContextOps solves this** by intercepting network requests at the `fetch` layer. It trims the conversation payload invisibly before React even renders it, maintaining strict memory limits while preserving your complete chat history on OpenAI's servers.
+**ContextOps solves this** by intercepting network requests at the `fetch` layer and safely "trimming" the conversation payload. It keeps only the most recent messages active in the UI, dramatically reducing lag and CPU usage, while ensuring your full chat history remains safely stored on OpenAI's servers. 
 
 ---
 
 ## ✨ Core Features
 
-### ⚡ Auto-Trim Engine (Crash Prevention)
-Never lose a thought to a browser crash again. ContextOps dynamically trims the chat interface to display only the most recent messages.
-* **O(1) Efficiency:** No heavy DOM manipulation. Trimming happens at the network layer.
-* **Instant Switching:** Seamlessly reset memory limits when switching between different chats.
+### ⚡ Smart Auto-Trim Engine
+Keeps ChatGPT highly responsive no matter how long the conversation gets.
+* **Network-Level Trimming:** Optimizes the chat payload invisibly before React renders it.
+* **Quick Actions:** Easily manage your view with `Optimize now`, `Load older`, and `Hot Reload` buttons directly in the UI.
 
 > *[ 🎥 Place your 3-second Auto-Trim GIF here ]*
 
-### 🧠 RAG Memory Injection
-ChatGPT forgets context. ContextOps doesn't. 
-* **Background Vectorization:** Automatically indexes your active conversations.
-* **Silent Injection:** When you ask a question, ContextOps silently searches its local memory and prepends historical context to your prompt using secure system markers, ensuring the AI stays on track.
+### 🧠 Local RAG Memory
+Give ChatGPT a persistent memory across conversations without relying on external servers.
+* **Automatic Indexing:** Seamlessly saves important context from your active conversations.
+* **Smart Injection:** When relevant, ContextOps silently prepends historical context to your prompts, ensuring ChatGPT remembers previous details.
 
 > *[ 🎥 Place your 3-second RAG Memory GIF here ]*
 
 ### 🪄 Custom Command Templates
-Stop typing the same complex prompts over and over.
-* **Quick Access:** Type `/cot`, `/spec`, or any custom command you define.
-* **Seamless Expansion:** Hit enter, and ContextOps expands the command into a highly detailed instruction set, completely hidden from the UI to keep your chat clean.
+Speed up your workflow with personalized prompt templates.
+* **Quick Expansion:** Type shortcuts like `/cot` (Chain of Thought) or `/spec` and hit enter. ContextOps expands them into detailed instructions instantly.
+* **Clean UI:** The massive instructions remain hidden from your view, keeping your chat interface clean and readable.
 
 > *[ 🎥 Place your 3-second Custom Commands GIF here ]*
 
 ---
 
-## 📊 Performance Benchmarks
+## 🔒 Privacy & Security
 
-By completely removing O(N²) regex operations and replacing heavy `MutationObserver` loops with O(1) attribute lookups, ContextOps delivers a frictionless experience.
+ContextOps is built with a strict local-first philosophy.
 
-| Metric | Vanilla ChatGPT | With ContextOps 🚀 |
-| :--- | :--- | :--- |
-| **CPU Usage (Typing)** | `Spikes to 30%+` | **`< 2%`** |
-| **RAM Usage (10k+ msgs)** | `1.5 GB+ (Crash)` | **`~150 MB`** |
-| **Message Tagging** | `O(N²)` complexity | **`O(1)`** direct access |
-| **Long Session Stability** | ⚠️ Unstable | ✅ Rock Solid |
+* ✅ **Fully Local Operation:** All processing, trimming, and RAG memory storage happens directly within your browser.
+* ❌ **No Data Collection:** We do not collect, store, or transmit your conversations.
+* ❌ **No Telemetry:** Zero external analytics or tracking calls.
 
 ---
 
 ## 📦 Installation
 
-Currently, ContextOps is available for manual installation (Developer Mode) for Chrome, Brave, and Edge.
+ContextOps is currently available for manual installation (Developer Mode).
 
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/yourusername/contextops.git
    ```
-2. Open your Chromium-based browser and navigate to `chrome://extensions/`.
-3. Toggle **Developer mode** on (usually in the top right corner).
-4. Click **Load unpacked** and select the `contextops` folder you just cloned.
-5. Open [ChatGPT](https://chatgpt.com), click the ContextOps extension icon to configure your settings, and enjoy!
+2. Open your Chrome browser and navigate to `chrome://extensions/`.
+3. Toggle **Developer mode** ON (top right corner).
+4. Click **Load unpacked** and select the cloned `contextops` folder.
+5. Open [ChatGPT](https://chatgpt.com) — the extension will automatically activate!
 
 ---
 
-## 🏗️ Architecture Overview
+## 🛠️ What It Does NOT Do
 
-ContextOps is built with a strict "Zero-DOM-Conflict" philosophy. Instead of fighting React's Virtual DOM (which causes infinite loops), we intercept the data before React sees it.
-
-* **`patchFetch` Interceptor:** Hooks into `window.fetch` to parse and trim the `/backend-api/conversation` payload.
-* **Streaming Transform:** Uses a `TransformStream` to strip out custom RAG tags and Commands from the UI during real-time generation.
-* **Local Caching:** Utilizes `localStorage` and background workers to handle RAG indexing without blocking the Main Thread.
+* It does **not** speed up OpenAI's server response times.
+* It does **not** delete your messages from OpenAI's servers (trimming is purely visual/UI-based).
 
 ---
 
 ## 🤝 Contributing
 
-We welcome all contributions! Whether it's squashing bugs, improving the RAG engine, or designing new UI features.
+We welcome contributions from the community! If you'd like to help improve ContextOps:
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -98,7 +92,7 @@ We welcome all contributions! Whether it's squashing bugs, improving the RAG eng
 5. Push to the Branch (`git push origin feature/AmazingFeature`)
 6. Open a Pull Request
 
-Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and testing guidelines.
+Please review our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and testing guidelines.
 
 ---
 
