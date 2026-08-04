@@ -31,17 +31,11 @@ When having deep conversations with ChatGPT (especially those spanning hundreds 
 ### 1. ⚡ Smart Auto-Trim Engine
 Optimizes the chat payload invisibly before it is processed by React, ensuring ChatGPT remains as fast and responsive as day one, regardless of how long the conversation gets. You can load the full history at any time or focus only on the latest messages.
 
-![Auto-Trim Engine](assets/demo-trim.gif)
-
 ### 2. 🧠 Local RAG (Memory) Engine
 Grants ChatGPT a persistent memory across conversations without relying on external servers or databases. It generates embeddings in-browser using `@xenova/transformers` via the Chrome Offscreen API and stores them in IndexedDB using `@orama/orama`. It seamlessly searches for critical context and prepends historical data to your prompts when needed.
 
-![Local RAG Memory](assets/demo-rag.gif)
-
 ### 3. 🪄 Custom Command Templates & Prompt Optimization
 Speed up your workflow with personalized, instantly expanding command templates (e.g., `/cot`, `/feynman`, `/spec`). Additionally, using the "Magic Sphere" interface, it instantly transforms your short texts into highly detailed and professional prompts (utilizing the Groq API or UI automation).
-
-![Custom Commands](assets/demo-commands.gif)
 
 ---
 
