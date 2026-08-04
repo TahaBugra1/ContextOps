@@ -1,0 +1,48 @@
+FAIL tests/unit/mainWorld.test.js (8.56 s)
+  Helper Functions in mainWorld.js
+    √ normalizeText lowercases and trims (4 ms)
+    √ generateUUID returns a valid UUID v4 string (2 ms)
+    stripRAGFromObject
+      √ removes RAG system prompt from string
+      √ removes Custom Command prompt from string
+      √ recursively processes objects and arrays (2 ms)
+      √ does not modify strings without special tags (1 ms)
+    tagMessages
+      √ tags DOM elements based on currentMapping (67 ms)
+      √ does not tag elements if mapping does not match (4 ms)
+    patchFetch
+      √ replaces window.fetch and intercepts backend-api calls (11 ms)
+    wrapPromptWithRAGAsync
+      √ injects RAG context when results are found (19 ms)
+      √ expands custom commands if present (1 ms)
+      √ returns immediately if RAG is disabled and no command (1 ms)
+    patchFetch Stream Transform
+      × transforms fetch response stream to strip RAG tags (12 ms)
+    WebSocket patch
+      √ intercepts WebSocket send to wrap prompt with RAG (55 ms)
+
+  ● Helper Functions in mainWorld.js › patchFetch Stream Transform › transforms fetch response stream to strip RAG tags
+
+    expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "[SİSTEM BİLGİSİ"
+    Received string:        "data: {\"messages\":[{\"content\":\"[SİSTEM BİLGİSİ: test]Real msg\"}]}
+
+    data: [DONE]
+    "
+
+    [0m [90m 310 |[39m       
+     [90m 311 |[39m       expect(output)[33m.[39mtoContain([32m'Real msg'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 312 |[39m       expect(output)[33m.[39mnot[33m.[39mtoContain([32m'[SİSTEM BİLGİSİ'[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 313 |[39m     })[33m;[39m
+     [90m 314 |[39m   })[33m;[39m
+     [90m 315 |[39m[0m
+
+      at Object.toContain (tests/unit/mainWorld.test.js:312:26)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 13 passed, 14 total
+Snapshots:   0 total
+Time:        23.588 s
+Ran all test suites matching /tests\\unit\\mainWorld.test.js/i.

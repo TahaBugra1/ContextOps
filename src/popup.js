@@ -8,7 +8,8 @@ const DEFAULTS = {
   optimizerLanguage: 'en',
   groq_key: null,
   selectedStyles: ['/image', '/makale', '/spec', '/summary', '/mail'],
-  customCommands: []
+  customCommands: [],
+  ragEnabled: true
 };
 
 const LIMIT_MIN = 1;
@@ -55,6 +56,7 @@ function sanitize(raw) {
     groq_key: typeof raw.groq_key === 'string' ? raw.groq_key : DEFAULTS.groq_key,
     selectedStyles: Array.isArray(raw.selectedStyles) ? raw.selectedStyles : DEFAULTS.selectedStyles,
     customCommands: Array.isArray(raw.customCommands) ? raw.customCommands : DEFAULTS.customCommands,
+    ragEnabled: typeof raw.ragEnabled === 'boolean' ? raw.ragEnabled : DEFAULTS.ragEnabled,
     starredIds: Array.isArray(raw.starredIds) ? raw.starredIds : []
   };
 }
@@ -147,6 +149,7 @@ async function init() {
   const openChatgptEl = document.getElementById('openChatgpt');
 
   const enabledEl = document.getElementById('enabled');
+  const ragEnabledEl = document.getElementById('ragEnabled');
   const limitEl = document.getElementById('limit');
   const loadOlderEl = document.getElementById('loadOlder');
   const trimNowEl = document.getElementById('trimNow');
@@ -175,6 +178,7 @@ async function init() {
   }
 
   if (enabledEl) enabledEl.checked = settings.enabled;
+  if (ragEnabledEl) ragEnabledEl.checked = settings.ragEnabled;
   if (limitEl) limitEl.value = String(settings.limit);
   if (scopeNoteEl) scopeNoteEl.textContent = t('onlyChatgptScope');
 
@@ -270,6 +274,14 @@ async function init() {
     });
   }
 
+  if (ragEnabledEl) {
+    ragEnabledEl.addEventListener('change', async () => {
+      settings = sanitize({ ...settings, ragEnabled: ragEnabledEl.checked });
+      await store.set({ [CONFIG_KEY]: settings });
+      await notifyTab();
+    });
+  }
+
   if (limitEl) {
     limitEl.addEventListener('change', async () => {
       const value = clamp(Number(limitEl.value) || settings.limit, LIMIT_MIN, LIMIT_MAX);
@@ -309,4 +321,12 @@ async function init() {
   }
 }
 
-init();
+if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+  window.sanitizePopup = sanitize;
+  window.clampPopup = clamp;
+  window.isSupportedUrl = isSupportedUrl;
+  window.initPopup = init;
+  window.renderStatus = renderStatus;
+} else {
+  document.addEventListener('DOMContentLoaded', init);
+}

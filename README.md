@@ -8,97 +8,107 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
-> ContextOps is an open-source Chrome MV3 extension designed to keep ChatGPT lightning-fast during long conversations. By intelligently trimming chat history before it renders, injecting a local RAG (Retrieval-Augmented Generation) memory engine, and providing quick custom commands, ContextOps supercharges your AI workflow.
+ContextOps is an open-source Chrome MV3 extension designed to keep ChatGPT lightning-fast during long conversations. It intercepts network requests to accelerate the UI (Auto-Trim), remembers the past with a local RAG memory engine, and automates your workflow with custom templates.
 
-[Installation](#-installation) • [Features](#-core-features) • [Privacy](#-privacy) • [Contributing](#-contributing)
+[Installation](#-installation) • [Features](#-core-features) • [How It Works](#-the-problem--solution) • [Contributing](#-contributing)
 
 </div>
 
 ---
 
-## 🚀 The Problem & The Solution
+## 🚀 The Problem & Solution
 
-When having long, deep conversations with ChatGPT, the browser interface can become extremely sluggish and unresponsive due to the massive amount of DOM elements being rendered.
+When having deep conversations with ChatGPT (especially those spanning hundreds of messages), the browser interface can become extremely sluggish, lag during scrolling, and consume heavy system resources due to the massive amount of DOM elements being processed.
 
-**ContextOps solves this** by intercepting network requests at the `fetch` layer and safely "trimming" the conversation payload. It keeps only the most recent messages active in the UI, dramatically reducing lag and CPU usage, while ensuring your full chat history remains safely stored on OpenAI's servers. 
+**ContextOps solves this problem** by catching network requests directly at the `fetch` layer (on the `MAIN World`). It safely "trims" the incoming chat payload before it is processed and rendered by React. By keeping only the most recent messages active, it **completely eliminates lag** while ensuring your entire chat history remains safely stored on OpenAI's servers.
+
+> **TL;DR:** No more ChatGPT lag or freezes; plus, you get a 100% local, in-browser memory (RAG) and smart shortcuts!
 
 ---
 
 ## ✨ Core Features
 
-### ⚡ Smart Auto-Trim Engine
-Keeps ChatGPT highly responsive no matter how long the conversation gets.
-* **Network-Level Trimming:** Optimizes the chat payload invisibly before React renders it.
-* **Quick Actions:** Easily manage your view with `Optimize now`, `Load older`, and `Hot Reload` buttons directly in the UI.
+### 1. ⚡ Smart Auto-Trim Engine
+Optimizes the chat payload invisibly before it is processed by React, ensuring ChatGPT remains as fast and responsive as day one, regardless of how long the conversation gets. You can load the full history at any time or focus only on the latest messages.
 
-> *[ 🎥 Place your 3-second Auto-Trim GIF here ]*
+### 2. 🧠 Local RAG (Memory) Engine
+Grants ChatGPT a persistent memory across conversations without relying on external servers or databases. It generates embeddings in-browser using `@xenova/transformers` via the Chrome Offscreen API and stores them in IndexedDB using `@orama/orama`. It seamlessly searches for critical context and prepends historical data to your prompts when needed.
 
-### 🧠 Local RAG Memory
-Give ChatGPT a persistent memory across conversations without relying on external servers.
-* **Automatic Indexing:** Seamlessly saves important context from your active conversations.
-* **Smart Injection:** When relevant, ContextOps silently prepends historical context to your prompts, ensuring ChatGPT remembers previous details.
-
-> *[ 🎥 Place your 3-second RAG Memory GIF here ]*
-
-### 🪄 Custom Command Templates
-Speed up your workflow with personalized prompt templates.
-* **Quick Expansion:** Type shortcuts like `/cot` (Chain of Thought) or `/spec` and hit enter. ContextOps expands them into detailed instructions instantly.
-* **Clean UI:** The massive instructions remain hidden from your view, keeping your chat interface clean and readable.
-
-> *[ 🎥 Place your 3-second Custom Commands GIF here ]*
+### 3. 🪄 Custom Command Templates & Prompt Optimization
+Speed up your workflow with personalized, instantly expanding command templates (e.g., `/cot`, `/feynman`, `/spec`). Additionally, using the "Magic Sphere" interface, it instantly transforms your short texts into highly detailed and professional prompts (utilizing the Groq API or UI automation).
 
 ---
 
-## 🔒 Privacy & Security
+## 🔒 Privacy First
 
-ContextOps is built with a strict local-first philosophy.
+ContextOps is built with a strict **local-first** philosophy.
 
-* ✅ **Fully Local Operation:** All processing, trimming, and RAG memory storage happens directly within your browser.
-* ❌ **No Data Collection:** We do not collect, store, or transmit your conversations.
-* ❌ **No Telemetry:** Zero external analytics or tracking calls.
+- ✅ **Fully Local:** All processing, JSON trimming, vector extraction, and RAG memory storage happen directly within your browser (client-side).
+- ❌ **No Data Collection:** We do not collect, store on our servers, or transmit your conversations or API keys.
+- ❌ **No Telemetry:** Zero external analytics or tracking scripts.
 
 ---
 
-## 📦 Installation
+## 🛠️ Tech Stack
 
-ContextOps is currently available for manual installation (Developer Mode).
+- **Architecture:** Vite + Vanilla JS (Chrome MV3, Main World Injection, Service Workers, and Offscreen Document API).
+- **Search & Vector Database:** IndexedDB-backed [@orama/orama](https://github.com/oramasearch/orama) for fast, in-browser text/vector search.
+- **AI (Embeddings):** [@xenova/transformers](https://github.com/xenova/transformers.js) (`Xenova/all-MiniLM-L6-v2` model) to run local embeddings directly in the browser.
+- **Testing:** Jest and JSDOM.
 
+---
+
+## 📦 Installation (Developer Mode)
+
+Because `node_modules` and the compiled production build are **not** included in the repository, you will need Node.js installed on your system to build the extension from the source code.
+
+### Prerequisites
+- **Node.js** (v18 or higher recommended)
+- **npm** or **yarn**
+
+### Build Steps
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/contextops.git
+   git clone https://github.com/TahaBugra1/ContextOps.git
+   cd ContextOps
    ```
-2. Open your Chrome browser and navigate to `chrome://extensions/`.
-3. Toggle **Developer mode** ON (top right corner).
-4. Click **Load unpacked** and select the cloned `contextops` folder.
-5. Open [ChatGPT](https://chatgpt.com) — the extension will automatically activate!
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+3. **Build the extension:**
+   ```bash
+   npm run build
+   ```
+   *(This will compile the assets using Vite and generate a `dist` folder.)*
+
+### Load in Chrome
+4. Open Chrome and type `chrome://extensions/` in the address bar.
+5. Toggle **Developer mode** ON (top right corner).
+6. Click the **Load unpacked** button and select the newly created **`dist`** folder inside the project.
+7. Open [ChatGPT](https://chatgpt.com) — ContextOps will automatically integrate into the interface and activate!
 
 ---
 
-## 🛠️ What It Does NOT Do
+## 👨‍💻 Development
 
-* It does **not** speed up OpenAI's server response times.
-* It does **not** delete your messages from OpenAI's servers (trimming is purely visual/UI-based).
+If you want to actively develop on the source code and test changes:
+```bash
+npm run dev
+```
+This command watches for file changes and automatically rebuilds the extension in the background. (Note: To apply JS/HTML changes, you may need to refresh the extension on the `chrome://extensions/` page or refresh the ChatGPT page).
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! If you'd like to help improve ContextOps:
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make (bug fixes, new features, documentation updates) are **greatly appreciated**.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Run tests (`npx jest`)
-5. Push to the Branch (`git push origin feature/AmazingFeature`)
-6. Open a Pull Request
-
-Please review our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and testing guidelines.
-
----
+Please review our [CONTRIBUTING.md](CONTRIBUTING.md) file for details on our development standards, code structure, and testing guidelines.
 
 ## 📜 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+ContextOps is distributed under the MIT License. See the `LICENSE` file for more information.
 
 <div align="center">
   <i>Built with ❤️ for power users and AI enthusiasts.</i>

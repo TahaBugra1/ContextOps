@@ -421,33 +421,7 @@
     wrapper.appendChild(expansion);
     wrapper.appendChild(mainSphere);
 
-    // --- RAG Toggle Button ---
-    const ragToggleBtn = document.createElement('div');
-    ragToggleBtn.className = 'cgptopt-rag-toggle-btn';
-    ragToggleBtn.title = "Hafıza Bağlantısı (RAG)";
-    ragToggleBtn.innerHTML = globalRagEnabled ? `🧠` : `🔇`;
-    ragToggleBtn.classList.toggle('disabled', !globalRagEnabled);
-    
-    ragToggleBtn.onclick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      globalRagEnabled = !globalRagEnabled;
-      
-      try { localStorage.setItem('cgptopt_rag_enabled', globalRagEnabled); } catch(err){}
-      
-      ragToggleBtn.classList.toggle('disabled', !globalRagEnabled);
-      ragToggleBtn.innerHTML = globalRagEnabled ? `🧠` : `🔇`;
-      
-      window.postMessage({
-        source: 'cgpt_optimizer_content',
-        type: 'cgptopt-toggle-rag',
-        payload: { enabled: globalRagEnabled }
-      }, '*');
 
-      showToast(globalRagEnabled ? "Hafıza Bağlantısı Açıldı 🧠" : "Hafıza Bağlantısı Kapatıldı 🔇 (İncognito)");
-    };
-
-    wrapper.appendChild(ragToggleBtn);
 
     // No setInterval needed, position is handled natively by CSS and DOM hierarchy!
   }
@@ -671,22 +645,19 @@
 }
 
   function setupObserver() {
-    // Send initial RAG state to mainWorld just in case
-    window.postMessage({
-      source: 'cgpt_optimizer_content',
-      type: 'cgptopt-toggle-rag',
-      payload: { enabled: globalRagEnabled }
-    }, '*');
 
     // --- Original ChatGPT Logic ---
+    let observerTimeout;
     const observer = new MutationObserver(() => {
       if (!isContextValid()) {
         observer.disconnect();
         return;
       }
-      injectStarButtons();
-
-      injectSphereMenu();
+      clearTimeout(observerTimeout);
+      observerTimeout = setTimeout(() => {
+        injectStarButtons();
+        injectSphereMenu();
+      }, 150); // Debounce by 150ms to prevent Aw Snap during massive React DOM hydrations
     });
     observer.observe(document.body, { childList: true, subtree: true });
   }
@@ -836,5 +807,21 @@
     }
   }
 
-  init();
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+    window.initContent = init;
+    window.sanitizeContent = sanitize;
+    window.clampContent = clamp;
+    window.showToast = showToast;
+    window.toggleTextareaLock = toggleTextareaLock;
+    window.showPreviewBubble = showPreviewBubble;
+    window.setupObserver = setupObserver;
+    window.injectStarButtons = injectStarButtons;
+    window.injectSphereMenu = injectSphereMenu;
+    window.toggleStar = toggleStar;
+    window.__setSettingsContent = (s) => Object.assign(settings, s);
+    window.__getStarredIds = () => starredIds;
+    window.__setStarredIds = (s) => { starredIds = s; };
+  } else {
+    init();
+  }
 })();
