@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧠 ContextOps
+# 🧠 ContextOps (ChatGPT Optimizer)
 
 **The Ultimate Productivity & Performance Extension for ChatGPT**
 
