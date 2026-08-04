@@ -1,69 +1,121 @@
-<<<<<<< HEAD
-# ChatGPT Optimizer
+<div align="center">
 
-## English
+# 🧠 ContextOps
 
-ChatGPT Optimizer is a Chrome MV3 extension that keeps ChatGPT responsive in long conversations by trimming heavy chat history before render.
+**ChatGPT İçin Nihai Üretkenlik ve Performans Eklentisi**
 
-### What It Does
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Eklentisi-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](#)
+[![License: MIT](https://img.shields.io/badge/Lisans-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PR_Kabul_Edilir-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
-- Works only on `https://chatgpt.com/*` and `https://chat.openai.com/*`
-- Keeps only the latest messages active to reduce UI lag
-- Auto optimize is enabled by default
-- Provides quick actions: `Optimize now`, `Load older`, `Hot Reload`
-- Supports Turkish and English UI
-- If browser language is not Turkish or English, UI defaults to English
+ContextOps, uzun sohbetler sırasında ChatGPT'yi şimşek hızında tutmak için tasarlanmış açık kaynaklı bir Chrome MV3 eklentisidir. Ağ isteklerini dinleyerek arayüzü hızlandırır (Auto-Trim), yerel bir RAG bellek motoruyla geçmişi hatırlar ve özel şablonlarla iş akışınızı otomatikleştirir.
 
-### What It Does Not Do
+[Kurulum](#-kurulum) • [Özellikler](#-temel-özellikler) • [Nasıl Çalışır](#-sorun-ve-çözüm) • [Katkıda Bulunma](#-katkıda-bulunma)
 
-- It does not speed up OpenAI servers
-- It does not collect or send personal data
-- It does not perform external analytics or telemetry calls
+</div>
 
-### Privacy
+---
 
-- Fully local operation in browser
-- No data collection
-- No telemetry
+## 🚀 Sorun ve Çözüm
 
-### Installation
+ChatGPT ile derinlemesine sohbetler yaparken (özellikle yüzlerce mesajlık konuşmalarda), işlenen devasa miktardaki DOM elemanları nedeniyle tarayıcı arayüzü son derece yavaşlayabilir, kaydırma (scrolling) sırasında kasabilir ve sistem kaynaklarını tüketebilir.
 
-1. Open `chrome://extensions`
-2. Enable `Developer mode`
-3. Click `Load unpacked`
-4. Select this project folder
+**ContextOps bu sorunu**, ağ isteklerini doğrudan `fetch` katmanında (`MAIN World` üzerinde) yakalayarak çözer. Gelen sohbet verisini (payload) React tarafından işlenmeden ve ekrana çizilmeden önce güvenli bir şekilde "budar" (trimler). Yalnızca en son mesajları aktif tutarak **gecikmeyi (lag) tamamen ortadan kaldırırken**, tüm sohbet geçmişinizin OpenAI sunucularında güvenle saklanmaya devam etmesini sağlar.
 
-## Türkçe
+> **Özetle:** Artık ChatGPT'de kasma/donma yok; üstelik tarayıcı içi %100 yerel hafıza (RAG) ve akıllı kısayollar var!
 
-ChatGPT Optimizer, ChatGPT web arayüzünde uzun sohbetlerde oluşan hantallığı azaltmak için konuşma geçmişini render öncesi optimize eder.
+---
 
-### Ne Yapar
+## ✨ Temel Özellikler
 
-- Sadece `https://chatgpt.com/*` ve `https://chat.openai.com/*` alanlarında çalışır
-- Arayüz yavaşlamasını azaltmak için son mesajları aktif tutar
-- Otomatik optimize varsayılan olarak açıktır
-- Hızlı işlemler sunar: `Şimdi optimize et`, `Daha eskileri göster`, `Hot Reload`
-- Türkçe ve İngilizce arayüzü destekler
-- Tarayıcı dili Türkçe veya İngilizce değilse varsayılan olarak İngilizce kullanır
+### 1. ⚡ Akıllı Otomatik Budama (Auto-Trim) Motoru
+Sohbet verisini React tarafından işlenmeden önce görünmez bir şekilde optimize ederek, sohbet ne kadar uzun olursa olsun ChatGPT'nin ilk günkü kadar hızlı ve duyarlı kalmasını sağlar. İstediğiniz an tüm geçmişi yükleyebilir veya sadece son mesajlara odaklanabilirsiniz.
 
-### Ne Yapmaz
+![Otomatik Budama Motoru](assets/demo-trim.gif)
 
-- OpenAI sunucu gecikmelerini hızlandırmaz
-- Kişisel veri toplamaz ve göndermez
-- Dış analitik veya telemetri çağrısı yapmaz
+### 2. 🧠 Yerel RAG (Hafıza) Motoru
+Harici sunuculara veya veritabanlarına bel bağlamadan, ChatGPT'ye sohbetler arası kalıcı bir bellek kazandırır. Chrome Offscreen API kullanarak `@xenova/transformers` ile tarayıcı içinde vektörler (embeddings) oluşturur ve bunları `@orama/orama` ile IndexedDB üzerinde saklar. Önemli bağlamları sorunsuz bir şekilde arar ve gerektiğinde geçmiş verileri prompt'unuzun başına ekler.
 
-### Gizlilik
+![Yerel RAG Bellek](assets/demo-rag.gif)
 
-- Tamamen tarayıcı içinde, yerel çalışır
-- Veri toplama yok
-- Telemetri yok
+### 3. 🪄 Özel Komut Şablonları & Prompt Optimizasyonu
+Anında genişleyen kişiselleştirilmiş komut şablonlarıyla (Örn: `/cot`, `/feynman`, `/spec`) iş akışınızı hızlandırın. Ayrıca, "Sihirli Yıldız" arayüzü sayesinde (Groq API veya UI otomasyonu kullanarak) yazdığınız kısa metinleri anında çok daha detaylı ve profesyonel promptlara dönüştürür. 
 
-### Kurulum
+![Özel Komutlar](assets/demo-commands.gif)
 
-1. Chrome'da `chrome://extensions` sayfasını açın
-2. `Developer mode` seçeneğini açın
-3. `Load unpacked` butonuna basın
-4. Bu proje klasörünü seçin
-=======
-# ContextOps
->>>>>>> 600d534507c6a9a10a5e0d7158aeda9bb880fbf5
+---
+
+## 🔒 Önce Gizlilik (Privacy First)
+
+ContextOps, kesin bir **önce-yerel (local-first)** felsefesiyle inşa edilmiştir.
+
+- ✅ **Tamamen Yerel:** Tüm işleme, JSON budama, vektör çıkarma ve RAG bellek depolama işlemleri doğrudan tarayıcınızın içinde (istemci tarafında) gerçekleşir.
+- ❌ **Veri Toplama Yok:** Sohbetlerinizi veya API anahtarlarınızı toplamıyoruz, kendi sunucularımıza saklamıyoruz veya iletmiyoruz.
+- ❌ **Telemetri Yok:** Sıfır harici analiz veya izleme kodu.
+
+---
+
+## 🛠️ Teknoloji Yığını
+
+- **Mimari:** Vite + Vanilla JS (Chrome MV3, Main World enjeksiyonu, Service Workers ve Offscreen Document API).
+- **Arama & Vektör Veritabanı:** Hızlı, tarayıcı içi metin/vektör araması için IndexedDB destekli [@orama/orama](https://github.com/oramasearch/orama).
+- **Yapay Zeka (Embeddings):** Yerel yerleştirmeleri doğrudan tarayıcıda çalıştırmak için [@xenova/transformers](https://github.com/xenova/transformers.js) (`Xenova/all-MiniLM-L6-v2` modeli).
+- **Test:** Jest ve JSDOM.
+
+---
+
+## 📦 Kurulum (Geliştirici Modu)
+
+Proje deposunda `node_modules` ve derlenmiş üretim (production) sürümü **bulunmadığı** için, eklentiyi kaynak koddan derlemek amacıyla sisteminizde Node.js yüklü olması gerekir.
+
+### Önkoşullar
+- **Node.js** (v18 veya üzeri önerilir)
+- **npm** veya **yarn**
+
+### Derleme Adımları
+1. **Depoyu klonlayın:**
+   ```bash
+   git clone https://github.com/TahaBugra1/ContextOps.git
+   cd ContextOps
+   ```
+2. **Gerekli paketleri (dependencies) yükleyin:**
+   ```bash
+   npm install
+   ```
+3. **Eklentiyi derleyin:**
+   ```bash
+   npm run build
+   ```
+   *(Bu komut, Vite kullanarak dosyaları derler ve bir `dist` klasörü oluşturur.)*
+
+### Chrome'a Yükleme
+4. Chrome'u açın ve adres çubuğuna `chrome://extensions/` yazın.
+5. **Geliştirici modunu (Developer mode)** AÇIN (sağ üst köşe).
+6. **Paketlenmemiş öğe yükle (Load unpacked)** butonuna tıklayın ve proje içindeki yeni oluşturulan **`dist`** klasörünü seçin.
+7. [ChatGPT](https://chatgpt.com)'yi açın — ContextOps otomatik olarak arayüze entegre olacak ve etkinleşecektir!
+
+---
+
+## 👨‍💻 Geliştirme
+
+Eğer kaynak kodu üzerinde aktif olarak geliştirme yapmak ve değişiklikleri test etmek isterseniz:
+```bash
+npm run dev
+```
+Bu komut, dosyalardaki değişiklikleri izler ve eklentiyi arka planda otomatik olarak yeniden derler. (Not: JS/HTML değişikliklerinin uygulanması için `chrome://extensions/` sayfasında eklentiyi yenilemeniz veya ChatGPT sayfasını yenilemeniz gerekebilir).
+
+---
+
+## 🤝 Katkıda Bulunma
+
+Açık kaynak topluluğunu öğrenmek, ilham almak ve üretmek için harika bir yer yapan şey katkılardır. Yapacağınız her türlü katkı (hata düzeltmeleri, yeni özellikler, dokümantasyon güncellemeleri) **büyük bir memnuniyetle karşılanacaktır**.
+
+Geliştirme standartlarımız, kod yapımız ve test yönergelerimiz hakkında ayrıntılar için lütfen [CONTRIBUTING.md](CONTRIBUTING.md) dosyamızı inceleyin.
+
+## 📜 Lisans
+
+ContextOps, MIT Lisansı altında dağıtılmaktadır. Daha fazla bilgi için `LICENSE` dosyasına bakın.
+
+<div align="center">
+  <i>Güçlü kullanıcılar ve yapay zeka meraklıları için ❤️ ile yapıldı.</i>
+</div>

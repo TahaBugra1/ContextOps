@@ -212,5 +212,8 @@
   },
   "memoryClearBtn": {
     "message": "Clear All Memory"
+  },
+  "ragToggleTitle": {
+    "message": "RAG Memory Engine"
   }
 }

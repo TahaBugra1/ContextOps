@@ -74,15 +74,26 @@ const chrome = {
     }
   },
   windows: {
-    get: jest.fn(() => Promise.resolve({ tabs: [{ id: 1 }] })),
-    create: jest.fn(() => Promise.resolve({ id: 2, tabs: [{ id: 1 }] })),
+    get: jest.fn(() => Promise.resolve({ tabs: [{ id: 1, url: 'https://chatgpt.com/?temporary-chat=true' }] })),
+    create: jest.fn(() => Promise.resolve({ id: 2, tabs: [{ id: 1, url: 'https://chatgpt.com/?temporary-chat=true' }] })),
     update: jest.fn(() => Promise.resolve()),
     remove: jest.fn(() => Promise.resolve())
   },
   tabs: {
     remove: jest.fn(() => Promise.resolve()),
     update: jest.fn(() => Promise.resolve()),
-    sendMessage: jest.fn(() => Promise.resolve({ success: true }))
+    sendMessage: jest.fn(() => Promise.resolve({ success: true })),
+    get: jest.fn(() => Promise.resolve({ url: '', status: 'complete' })),
+    onUpdated: {
+      listeners: [],
+      addListener: function(fn) { this.listeners.push(fn); },
+      removeListener: function(fn) { this.listeners = this.listeners.filter(l => l !== fn); },
+      trigger: function(...args) { this.listeners.forEach(fn => fn(...args)); },
+      clear: function() { this.listeners = []; }
+    }
+  },
+  scripting: {
+    executeScript: jest.fn(() => Promise.resolve([{ result: {} }]))
   },
   i18n: {
     getMessage: jest.fn((key) => `mocked_translation_for_${key}`)

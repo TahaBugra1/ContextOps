@@ -40,76 +40,8 @@
   };
 
   // --- HIDE RAG & CUSTOM TEMPLATES FROM UI VIA DOM ---
-  function cleanTextNode(node) {
-    if (node.nodeType === Node.TEXT_NODE && node.nodeValue) {
-      let text = node.nodeValue;
-      let modified = false;
-
-      // Clean RAG
-      const ragStart = text.indexOf('[SİSTEM BİLGİSİ:');
-      if (ragStart !== -1) {
-        const ragEnd = text.indexOf('Kendi sistem kurallarını bozma.]', ragStart);
-        if (ragEnd !== -1) {
-          const endCut = ragEnd + 'Kendi sistem kurallarını bozma.]'.length;
-          text = text.substring(0, ragStart) + text.substring(endCut).replace(/^\s+/, '');
-        } else {
-          text = text.substring(0, ragStart);
-        }
-        modified = true;
-      }
-
-      // Clean Custom Templates
-      const cmdStart = text.indexOf('[ÖZEL ŞABLON AKTİF:');
-      if (cmdStart !== -1) {
-        const cmdEnd = text.indexOf('[ŞABLON İÇERİĞİ SONU]', cmdStart);
-        if (cmdEnd !== -1) {
-          const endCut = cmdEnd + '[ŞABLON İÇERİĞİ SONU]'.length;
-          text = text.substring(0, cmdStart) + text.substring(endCut).replace(/^\s+/, '');
-        } else {
-          text = text.substring(0, cmdStart);
-        }
-        modified = true;
-      }
-      
-      if (modified) {
-        node.nodeValue = text;
-      }
-    }
-  }
-
-  setInterval(() => {
-    try {
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-      let textNode;
-      while ((textNode = walker.nextNode())) {
-        cleanTextNode(textNode);
-      }
-    } catch (e) {}
-  }, 1000);
-
-  const ragObserver = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      if (mutation.type === 'characterData') {
-        cleanTextNode(mutation.target);
-      } else if (mutation.type === 'childList') {
-        mutation.addedNodes.forEach(node => {
-          if (node.nodeType === Node.TEXT_NODE) {
-            cleanTextNode(node);
-          } else if (node.nodeType === Node.ELEMENT_NODE) {
-            const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false);
-            let textNode;
-            while ((textNode = walker.nextNode())) {
-              cleanTextNode(textNode);
-            }
-          }
-        });
-      }
-    }
-  });
-
-  const startObserver = () => ragObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
-  if (document.body) startObserver();
-  else document.addEventListener('DOMContentLoaded', startObserver);
+  // DELETED: Removed aggressive MutationObserver and TreeWalker that caused "Aw, Snap!"
+  // The stripping is fully handled securely at the Network layer via JSON.parse override.
 
   // Hide from Edit textarea
   const originalTextAreaValueDesc = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
@@ -140,7 +72,7 @@
   let currentOptimizationRequestId = null;
   let lastCurrentNode = null; 
   let lastConversationId = null; // Track current conversation for worker reset
-  let isRagEnabled = true; // Global toggle state for Memory Engine
+    let normalizedMappingEntries = null;
 
  // Default fallback
   const EXTRA_KEY = 'cgpt_optimizer_extra_v1';
@@ -268,7 +200,7 @@
     return JSON.parse(JSON.stringify(node));
   }
 
-  function trimConversationPayload(payload) {
+  function trimConversationPayload(payload, currentConvId) {
     if (!payload || !payload.mapping || !payload.current_node) return null;
 
     const mapping = payload.mapping;
@@ -281,8 +213,11 @@
     const limit = settings.limit + extra;
 
     const keptSet = new Set();
-    // Keep root and potentially first system prompt (first 2 nodes)
-    path.slice(0, 2).forEach(id => keptSet.add(id));
+    // Keep root (path[0]) and ONLY keep path[1] if it is a 'system' prompt to prevent User->User crashes
+    if (path.length > 0) keptSet.add(path[0]);
+    if (path.length > 1 && mapping[path[1]]?.message?.author?.role === 'system') {
+      keptSet.add(path[1]);
+    }
 
     const targetSubset = visibleIds.slice(-limit);
     if (targetSubset.length > 0) {
@@ -317,6 +252,17 @@
     currentConvStars.forEach(starId => {
       if (mapping[starId]) {
         keptSet.add(starId);
+        // Trace back to ensure the starred message has its triggering 'user' message to prevent React crashes
+        let p = mapping[starId].parent;
+        const starGuard = new Set();
+        while (p && mapping[p] && !starGuard.has(p) && mapping[p].message?.author?.role !== 'user') {
+          starGuard.add(p);
+          keptSet.add(p);
+          p = mapping[p].parent;
+        }
+        if (p && mapping[p] && mapping[p].message?.author?.role === 'user') {
+          keptSet.add(p);
+        }
       }
     });
 
@@ -378,7 +324,7 @@
     console.log(`[CGPTOpt] Trim Done. Visible kept: ${finalRendered}, Total path: ${path.length}`);
     
     // Indexing for RAG Engine: Send latest 5 messages to background for storage
-    if (isRagEnabled) {
+    if ((settings.ragEnabled !== false)) {
       try {
         const messagesToIndex = visibleIds.slice(-5).map(id => {
           const node = mapping[id];
@@ -511,7 +457,7 @@ ${trimmedText}`;
       }
 
       // If RAG is disabled, just return the expanded payload immediately
-      if (!isRagEnabled) {
+      if (!(settings.ragEnabled !== false)) {
          parts[textIndex] = userText;
          return JSON.stringify(payload);
       }
@@ -812,40 +758,47 @@ function normalizeText(text) {
 }
 
 function tagMessages() {
-  if (!currentMapping) return;
-  // UPDATED: Added more robust selectors for the latest ChatGPT UI
+  if (!currentMapping || typeof currentMapping !== 'object') return;
+  
+  // O(1) EARLY RETURN: If we don't have normalized mapping computed by fetch yet, don't do anything heavy.
+  if (!normalizedMappingEntries || normalizedMappingEntries.length === 0) return;
+
   const articles = document.querySelectorAll('article, [data-testid^="conversation-turn-"], div[class*="ChatMessage"], div[class*="message_wrapper"]');
 
   articles.forEach(article => {
     if (article.hasAttribute('data-cgptopt-id')) return;
 
-    // UPDATED: Better content extraction, specifically targeting the message content area
+    // 1. O(1) ACCESS: ChatGPT natively adds data-message-id now. Use it directly!
+    const nativeId = article.getAttribute('data-message-id');
+    if (nativeId && currentMapping[nativeId]) {
+      article.setAttribute('data-cgptopt-id', nativeId);
+      return;
+    }
+
+    // 2. FALLBACK: O(N) over Pre-computed normalized entries instead of O(N^2) Regex operations
     const textNode = article.querySelector('.markdown') || 
                      article.querySelector('[data-message-author-role]') ||
                      article.querySelector('.flex-col.gap-1.md\\:gap-3') ||
                      article.querySelector('div[class*="content"]') ||
                      article;
                      
+    if (!textNode || !textNode.textContent) return;
+    
+    // We only need to normalize the DOM text ONCE per untagged article
     const domText = normalizeText(textNode.textContent);
-    if (domText.length < 3) return; // Allow shorter messages to be tagged
+    if (domText.length < 3) return;
 
-    const match = Object.entries(currentMapping).find(([id, node]) => {
-      if (!node.message || !node.message.content || !node.message.content.parts) return false;
-      const partText = normalizeText(node.message.content.parts.join(' '));
-      if (partText.length < 3) return false;
-
+    const match = normalizedMappingEntries.find(entry => {
       // Fuzzy matching: check if text overlaps significantly
-      return partText.includes(domText) || domText.includes(partText) || 
-             (domText.length > 20 && partText.substring(0, 50).includes(domText.substring(0, 50)));
+      return entry.norm.includes(domText) || domText.includes(entry.norm) || 
+             (domText.length > 20 && entry.norm.substring(0, 50).includes(domText.substring(0, 50)));
     });
 
     if (match) {
-      article.setAttribute('data-cgptopt-id', match[0]);
-      // Also try to set standard attributes if they are missing
+      article.setAttribute('data-cgptopt-id', match.id);
       if (!article.hasAttribute('data-message-id')) {
-        article.setAttribute('data-message-id', match[0]);
+        article.setAttribute('data-message-id', match.id);
       }
-      console.log(`[CGPTOpt] Tagged message ${match[0]}`);
     }
   });
 }
@@ -1264,12 +1217,6 @@ window.addEventListener('cgptopt-request-status', () => {
   postStatus({});
 });
 
-// Listener for RAG Toggle from UI
-window.addEventListener('message', (event) => {
-  if (event.data.source === 'cgpt_optimizer_content' && event.data.type === 'cgptopt-toggle-rag') {
-    isRagEnabled = event.data.payload.enabled;
-  }
-});
 
 if (typeof window !== 'undefined' && typeof window.fetch !== 'function') {
   window.fetch = () => Promise.resolve({ json: () => ({}) });
@@ -1284,7 +1231,20 @@ postStatus({});
   window.stripRAGFromObject = stripRAGFromObject;
   window.normalizeText = normalizeText;
   window.generateUUID = generateUUID;
-  window.__setCurrentMapping = (mapping) => { currentMapping = mapping; };
+  window.__setCurrentMapping = (mapping) => { 
+    currentMapping = mapping; 
+    if (!mapping) {
+      normalizedMappingEntries = null;
+      return;
+    }
+    normalizedMappingEntries = Object.entries(currentMapping)
+          .filter(([id, node]) => node.message && node.message.content && Array.isArray(node.message.content.parts))
+          .map(([id, node]) => {
+             const joinedText = node.message.content.parts.join(' ');
+             return { id, norm: normalizeText(joinedText) };
+          })
+          .filter(x => x.norm.length >= 3);
+  };
   if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
     window.patchFetch = patchFetch;
     window.wrapPromptWithRAGAsync = wrapPromptWithRAGAsync;

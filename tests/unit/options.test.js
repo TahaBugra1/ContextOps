@@ -45,7 +45,7 @@ describe('options.js', () => {
     });
   });
 
-  describe('initOptions DOM binding', () => {
+  describe('initOptions DOM binding (Phase 8)', () => {
     test('loads saved settings and populates inputs', async () => {
       const { initOptions } = window;
       
@@ -68,6 +68,95 @@ describe('options.js', () => {
       expect(enabledEl.checked).toBe(false);
       expect(limitEl.value).toBe("42");
       expect(optimizerLanguageEl.value).toBe('tr');
+    });
+
+    test('saveEl click saves current settings', async () => {
+      const { initOptions } = window;
+      await initOptions();
+      
+      document.getElementById('limit').value = "55";
+      document.getElementById('enabled').checked = false;
+      document.getElementById('save').click();
+      
+      // Allow async save to process
+      await new Promise(process.nextTick);
+      
+      const stored = await chrome.storage.sync.get('cgpt_optimizer_config_v1');
+      expect(stored.cgpt_optimizer_config_v1.limit).toBe(55);
+      expect(stored.cgpt_optimizer_config_v1.enabled).toBe(false);
+    });
+
+    test('resetEl click resets settings to defaults', async () => {
+      const { initOptions } = window;
+      
+      await chrome.storage.sync.set({
+        cgpt_optimizer_config_v1: { limit: 99, enabled: false }
+      });
+      await initOptions();
+      
+      document.getElementById('reset').click();
+      
+      await new Promise(process.nextTick);
+      
+      const stored = await chrome.storage.sync.get('cgpt_optimizer_config_v1');
+      expect(stored.cgpt_optimizer_config_v1.limit).toBe(5); // Default limit
+      expect(stored.cgpt_optimizer_config_v1.enabled).toBe(true); // Default enabled
+      
+      // Verify DOM updated
+      expect(document.getElementById('limit').value).toBe("5");
+    });
+  });
+
+  describe('Custom Commands and Memory Explorer (Phase 8)', () => {
+    test('Custom command adds to list and storage', async () => {
+      const { initOptions } = window;
+      await initOptions();
+      
+      document.getElementById('cc-id').value = '/testcmd';
+      document.getElementById('cc-name').value = 'Test Command';
+      document.getElementById('cc-instruction').value = 'Do the test';
+      
+      document.getElementById('cc-add-btn').click();
+      
+      await new Promise(process.nextTick);
+      
+      const stored = await chrome.storage.sync.get('cgpt_optimizer_config_v1');
+      expect(stored.cgpt_optimizer_config_v1.customCommands.length).toBe(1);
+      expect(stored.cgpt_optimizer_config_v1.customCommands[0].id).toBe('/testcmd');
+      
+      // Verify DOM updated
+      const ccList = document.getElementById('custom-commands-list');
+      expect(ccList.children.length).toBe(1);
+      expect(ccList.innerHTML).toContain('/testcmd');
+    });
+
+    test('loadMemories fetches from background and renders', async () => {
+      chrome.runtime.sendMessage.mockImplementation((msg, cb) => {
+        if (msg.type === 'GET_ALL_MEMORIES') {
+          cb({ success: true, memories: [{ id: 'm1', text: 'memory1', timestamp: 123456 }] });
+        }
+      });
+      
+      const { initOptions } = window;
+      await initOptions();
+      
+      // initOptions calls loadMemories automatically
+      await new Promise(process.nextTick);
+      
+      const list = document.getElementById('memory-list');
+      expect(list.children.length).toBe(1);
+      expect(list.innerHTML).toContain('memory1');
+    });
+
+    test('clearMemoryBtn triggers CLEAR_MEMORY', async () => {
+      window.confirm = jest.fn(() => true); // Mock confirm dialog
+      
+      const { initOptions } = window;
+      await initOptions();
+      
+      document.getElementById('clear-memory').click();
+      
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: 'CLEAR_MEMORY' }, expect.any(Function));
     });
   });
 });

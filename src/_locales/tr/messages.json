@@ -212,5 +212,8 @@
   },
   "memoryClearBtn": {
     "message": "Tüm Hafızayı Sil"
+  },
+  "ragToggleTitle": {
+    "message": "Hafıza Bağlantısı (RAG)"
   }
 }

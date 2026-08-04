@@ -37,9 +37,15 @@
 
     <!-- Memory Engine Section -->
     <section class="turbo-card">
-      <div class="turbo-header">
-        <span class="icon">🧠</span>
-        <span class="title">RAG Memory Engine</span>
+      <div class="turbo-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span class="icon">🧠</span>
+          <span class="title" data-i18n="ragToggleTitle">RAG Memory Engine</span>
+        </div>
+        <label class="switch" style="margin: 0;">
+          <input id="ragEnabled" type="checkbox">
+          <span class="slider"></span>
+        </label>
       </div>
       
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 10px;">

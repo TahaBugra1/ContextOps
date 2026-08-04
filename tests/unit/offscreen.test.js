@@ -2,6 +2,11 @@ const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
+if (!global.crypto) global.crypto = {};
+if (!global.crypto.randomUUID) {
+  global.crypto.randomUUID = () => 'mocked-uuid-' + Math.random();
+}
+
 // Mock IndexedDB
 const dummyIDB = {
   transaction: jest.fn(() => ({
@@ -75,5 +80,80 @@ describe('offscreen.js', () => {
     const results = await Promise.all(chrome.runtime.onMessage.listeners.map(fn => fn(request, {}, sendResponse)));
     expect(results[0]).toBe(false);
     expect(sendResponse).not.toHaveBeenCalled();
+  });
+
+  test('handles EMBED_AND_STORE', async () => {
+    const sendResponse = jest.fn();
+    const request = { target: 'offscreen', type: 'EMBED_AND_STORE', text: 'memory text' };
+    
+    await Promise.all(chrome.runtime.onMessage.listeners.map(fn => fn(request, {}, sendResponse)));
+    await new Promise(r => setTimeout(r, 100));
+
+    expect(sendResponse).toHaveBeenCalledWith({ success: true });
+  });
+
+  test('handles RAG_SEARCH', async () => {
+    const sendResponse = jest.fn();
+    const request = { target: 'offscreen', type: 'RAG_SEARCH', text: 'query' };
+    
+    // We mock @orama/orama count to return 1 so it proceeds to search
+    require('@orama/orama').count.mockResolvedValue(1);
+    
+    await Promise.all(chrome.runtime.onMessage.listeners.map(fn => fn(request, {}, sendResponse)));
+    await new Promise(r => setTimeout(r, 100));
+
+    expect(sendResponse).toHaveBeenCalledWith({ success: true, results: [] });
+  });
+
+  test('handles GET_STATS', async () => {
+    const sendResponse = jest.fn();
+    const request = { target: 'offscreen', type: 'GET_STATS' };
+    
+    require('@orama/orama').count.mockResolvedValue(5);
+
+    await Promise.all(chrome.runtime.onMessage.listeners.map(fn => fn(request, {}, sendResponse)));
+    await new Promise(r => setTimeout(r, 100));
+
+    expect(sendResponse).toHaveBeenCalledWith({
+      success: true,
+      stats: expect.objectContaining({ vectorCount: 5, modelLoaded: true })
+    });
+  });
+
+  test('handles CLEAR_MEMORY', async () => {
+    const sendResponse = jest.fn();
+    const request = { target: 'offscreen', type: 'CLEAR_MEMORY' };
+
+    await Promise.all(chrome.runtime.onMessage.listeners.map(fn => fn(request, {}, sendResponse)));
+    await new Promise(r => setTimeout(r, 100));
+
+    expect(sendResponse).toHaveBeenCalledWith({ success: true });
+  });
+
+  test('handles GET_ALL_MEMORIES', async () => {
+    const sendResponse = jest.fn();
+    const request = { target: 'offscreen', type: 'GET_ALL_MEMORIES' };
+
+    // Need to trigger an insert to populate insertionOrder before getting memories
+    const insertRequest = { target: 'offscreen', type: 'EMBED_AND_STORE', text: 'text', id: '123' };
+    await Promise.all(chrome.runtime.onMessage.listeners.map(fn => fn(insertRequest, {}, jest.fn())));
+    await new Promise(r => setTimeout(r, 100));
+
+    await Promise.all(chrome.runtime.onMessage.listeners.map(fn => fn(request, {}, sendResponse)));
+    await new Promise(r => setTimeout(r, 100));
+
+    expect(sendResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ success: true, memories: expect.any(Array) })
+    );
+  });
+
+  test('handles DELETE_MEMORY', async () => {
+    const sendResponse = jest.fn();
+    const request = { target: 'offscreen', type: 'DELETE_MEMORY', id: '123' };
+
+    await Promise.all(chrome.runtime.onMessage.listeners.map(fn => fn(request, {}, sendResponse)));
+    await new Promise(r => setTimeout(r, 100));
+
+    expect(sendResponse).toHaveBeenCalledWith({ success: true });
   });
 });
