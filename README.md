@@ -38,7 +38,7 @@ Optimizes the chat payload invisibly before it is processed by React, ensuring C
 Grants ChatGPT a persistent memory across conversations without relying on external servers or databases. It generates embeddings in-browser using `@xenova/transformers` via the Chrome Offscreen API and stores them in IndexedDB using `@orama/orama`. It seamlessly searches for critical context and prepends historical data to your prompts when needed.
 
 <p align="center">
-  <img src="./images/settingUI.jpeg" width="850">
+  <img src="./images/settingsUI.jpeg" width="850">
 </p>
 
 ### 3. 🪄 Custom Command Templates & Prompt Optimization
