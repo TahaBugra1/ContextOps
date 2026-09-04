@@ -115,7 +115,14 @@ Please review our [CONTRIBUTING.md](CONTRIBUTING.md) file for details on our dev
 
 ## 📜 License
 
-ContextOps is distributed under the MIT License. See the `LICENSE` file for more information.
+## License
+
+This project is source-available for personal and educational use.
+
+Commercial use, redistribution, publication of modified versions,
+and derivative works require prior written permission.
+
+See the [LICENSE](LICENSE) file for full terms.
 
 <div align="center">
   <i>Built with ❤️ for power users and AI enthusiasts.</i>
