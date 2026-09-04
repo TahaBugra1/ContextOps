@@ -5,10 +5,10 @@
 **The Ultimate Productivity & Performance Extension for ChatGPT**
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white&style=for-the-badge)](#)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![License: Source Available](https://img.shields.io/badge/License-Source%20Available-blue.svg?style=for-the-badge)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
-ContextOps is an open-source Chrome MV3 extension designed to keep ChatGPT lightning-fast during long conversations. It intercepts network requests to accelerate the UI (Auto-Trim), remembers the past with a local RAG memory engine, and automates your workflow with custom templates.
+ContextOps is a source-available Chrome MV3 extension designed to keep ChatGPT lightning-fast during long conversations. It intercepts network requests to accelerate the UI (Auto-Trim), remembers the past with a local RAG memory engine, and automates your workflow with custom templates.
 
 [Installation](#-installation) • [Features](#-core-features) • [How It Works](#-the-problem--solution) • [Contributing](#-contributing)
 
@@ -109,13 +109,11 @@ This command watches for file changes and automatically rebuilds the extension i
 
 ## 🤝 Contributing
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make (bug fixes, new features, documentation updates) are **greatly appreciated**.
+Contributions are what make the developer community such an amazing place to learn, inspire, and create. Any contributions you make (bug fixes, new features, documentation updates) are **greatly appreciated**.
 
 Please review our [CONTRIBUTING.md](CONTRIBUTING.md) file for details on our development standards, code structure, and testing guidelines.
 
 ## 📜 License
-
-## License
 
 This project is source-available for personal and educational use.
 
